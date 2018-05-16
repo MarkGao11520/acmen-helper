@@ -14,4 +14,6 @@ public interface DBDefinition {
     String getUsername();
 
     String getPassword();
+
+    String getDbName();
 }
