@@ -10,13 +10,14 @@ import com.acmen.acmenhelper.model.DBDefinition;
 import com.acmen.acmenhelper.util.ApplicationContextHolder;
 import com.acmen.acmenhelper.util.CompressUtil;
 import com.acmen.acmenhelper.util.DBUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
     @Resource(name = "defaultProjectGenerator")
     private IProjectGenerator defaultProjectGenerator;
 
+    @Autowired
+    private HttpSession session;
+
 
     @Override
     public ServiceMultiResult<String> getTableList(DBDefinition dbDefinition) {
@@ -38,9 +42,9 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
         //创建驱动器
         Connection conn = DBUtil.getConnection(dbDefinition);
         ResultSet rs = null;
-        DatabaseMetaData dbmd = null;
 
         try{
+            DatabaseMetaData dbmd = conn.getMetaData();
             rs = dbmd.getTables(null, dbDefinition.getDbName(), "%", null);
             while (rs.next()) {
                 tables.add(rs.getString("TABLE_NAME"));
@@ -51,13 +55,14 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
         } finally {
             DBUtil.killConnection(rs,conn);
         }
+        session.setAttribute("dbDefinition",dbDefinition);
         return new ServiceMultiResult<>(tables.size(),tables);
     }
 
     @Override
     public ServiceResult<String> genCode(CodeDefinition codeDefinition) {
         //1.生成项目骨架 两种方案：
-        //		1）调用系统命令行使用maven命令生成
+        //		- 1）调用系统命令行使用maven命令生成
         //		2）使用java.io生成
         String projectPath = defaultProjectGenerator.generateProjectStructure(codeDefinition);
         //2.使用mybatis的自动生成工具生成dao,mapper,pojo

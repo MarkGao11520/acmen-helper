@@ -1,10 +1,7 @@
 package com.acmen.acmenhelper.generate;
 
-import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * 默认代码生成器，SOA单体架构

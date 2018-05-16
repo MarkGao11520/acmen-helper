@@ -12,10 +12,6 @@ import lombok.Setter;
 public class MysqlDBDefinition  implements DBDefinition{
     private String ip;
 
-    private String db;
-
-    private String url;
-
     private String dbName;
 
     private String username;
@@ -38,6 +34,11 @@ public class MysqlDBDefinition  implements DBDefinition{
     @Override
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String getDbName() {
+        return dbName;
     }
 
     @Override
