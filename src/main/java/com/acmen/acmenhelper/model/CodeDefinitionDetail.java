@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import static com.acmen.acmenhelper.util.NameConvertUtil.packageConvertPath;
+
 /**
  * @author gaowenfeng
  * @date 2018/5/16
@@ -58,9 +60,9 @@ public class CodeDefinitionDetail{
         this.basePackage = this.codeDefinition.getGroupId()+"."+this.codeDefinition.getArtifactId();
         this.modulePackage = this.basePackage+".model";
         this.mapperPackage = this.basePackage+".dao";
-        this.servicePackage = this.basePackage+".service";
-        this.serviceImplPackage = this.servicePackage+".impl";
-        this.controllerPackage = this.basePackage+".web";
+        this.servicePackage = packageConvertPath(this.basePackage+".service");
+        this.serviceImplPackage = packageConvertPath(this.servicePackage+".impl");
+        this.controllerPackage = packageConvertPath(this.basePackage+".web");
         this.mapperInterfaceReference = this.basePackage+".core.Mapper";
     }
 

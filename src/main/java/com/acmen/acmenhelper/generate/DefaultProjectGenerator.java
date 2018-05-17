@@ -2,16 +2,10 @@ package com.acmen.acmenhelper.generate;
 
 import com.acmen.acmenhelper.model.CodeDefinition;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import static com.acmen.acmenhelper.model.CodeDefinitionDetail.PROJECT_PATH;
@@ -86,6 +80,10 @@ public class DefaultProjectGenerator implements IProjectGenerator {
         return cmds;
     }
 
+    /**
+     * 测试
+     * @param args
+     */
     public static void main(String[] args) {
         CodeDefinition codeDefinition = new CodeDefinition();
         codeDefinition.setArtifactId("demo");

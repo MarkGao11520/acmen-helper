@@ -11,6 +11,7 @@ import com.acmen.acmenhelper.util.ApplicationContextHolder;
 import com.acmen.acmenhelper.util.CompressUtil;
 import com.acmen.acmenhelper.util.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -28,8 +29,14 @@ import java.util.List;
  */
 @Service
 public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
-    @Resource(name = "defaultProjectGenerator")
-    private IProjectGenerator defaultProjectGenerator;
+
+    @Value("${code-generator}")
+    private String codeGeneratorName;
+
+    @Value("${project-generator}")
+    private String projectGeneratorName;
+
+    private IProjectGenerator projectGenerator = ApplicationContextHolder.getBean(projectGeneratorName);
 
     @Autowired
     private HttpSession session;
@@ -61,14 +68,13 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
 
     @Override
     public ServiceResult<String> genCode(CodeDefinition codeDefinition) {
-        //1.生成项目骨架 两种方案：
-        //		- 1）调用系统命令行使用maven命令生成
-        //		2）使用java.io生成
-        String projectPath = defaultProjectGenerator.generateProjectStructure(codeDefinition);
+        //1.生成项目骨架：
+        String projectPath = projectGenerator.generateProjectStructure(codeDefinition);
+        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition,projectPath);
+
         //2.使用mybatis的自动生成工具生成dao,mapper,pojo
         //3.使用freemarker模板引擎生成service，controller层代码
-        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition,projectPath);
-        AbstractCodeGenerator defaultCodeGenerator = ApplicationContextHolder.getBean("defaultCodeGenerator");
+        AbstractCodeGenerator defaultCodeGenerator = ApplicationContextHolder.getBean(codeGeneratorName);
         defaultCodeGenerator.setCodeDefinitionDetail(codeDefinitionDetail);
         defaultCodeGenerator.genCode();
 

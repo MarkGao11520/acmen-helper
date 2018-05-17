@@ -3,8 +3,9 @@ package com.acmen.acmenhelper.generate;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.DBDefinition;
-import com.acmen.acmenhelper.util.NameConvertUtil;
 import com.google.common.collect.Maps;
+import freemarker.template.TemplateExceptionHandler;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.MyBatisGenerator;
@@ -17,12 +18,12 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.acmen.acmenhelper.model.CodeDefinitionDetail.JAVA_PATH;
-import static com.acmen.acmenhelper.model.CodeDefinitionDetail.RESOURCES_PATH;
+import static com.acmen.acmenhelper.model.CodeDefinitionDetail.*;
 import static com.acmen.acmenhelper.util.NameConvertUtil.*;
 
 /**
@@ -35,6 +36,8 @@ import static com.acmen.acmenhelper.util.NameConvertUtil.*;
 @Service("defaultCodeGenerator")
 @Scope("prototype")
 @Slf4j
+//TODO 测试用最后删掉
+@Data
 public class DefaultCodeGenerator extends AbstractCodeGenerator {
 
     private final static String LOG_PRE = "代码生成器>";
@@ -59,7 +62,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
             Map<String,Object> data = buildDataMap(codeDefinition,modelNameUpperCamel,tableName);
 
             //生成java类
-            generateFtlCode(data,codeDefinitionDetail.getServicePackage(),modelNameUpperCamel,"Controller.java","controller.ftl");
+            generateFtlCode(data,codeDefinitionDetail.getControllerPackage(),modelNameUpperCamel,"Controller.java","controller.ftl");
 
             //生成server类
             generateFtlCode(data,codeDefinitionDetail.getServicePackage(),modelNameUpperCamel,"Service.java","service.ftl");
@@ -201,5 +204,35 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     private String buildModelNameUpperCamel(String tableName, String modelName){
         return StringUtils.isEmpty(modelName) ? tableNameConvertUpperCamel(tableName) : modelName;
     }
+
+    /**
+     * 测试
+     * @param args
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException {
+        DefaultCodeGenerator defaultCodeGenerator = new DefaultCodeGenerator();
+        CodeDefinition codeDefinition = new CodeDefinition();
+        codeDefinition.setArtifactId("demo");
+        codeDefinition.setGroupId("com.example");
+
+        codeDefinition.setProjectName("test-demo");
+        codeDefinition.setDescription("测试");
+        codeDefinition.setVersion("vt2.1");
+        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition,"/Users/gaowenfeng/project/data/test-demo");
+
+        defaultCodeGenerator.setCodeDefinitionDetail(codeDefinitionDetail);
+
+        freemarker.template.Configuration cfg = new freemarker.template.Configuration(freemarker.template.Configuration.VERSION_2_3_23);
+        cfg.setDirectoryForTemplateLoading(new File(PROJECT_PATH+TEMPLATE_FILE_PATH));
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
+
+        defaultCodeGenerator.setCfg(cfg);
+        defaultCodeGenerator.genCodeByCustomModelName("blog",null);
+    }
+
+
+
 
 }
