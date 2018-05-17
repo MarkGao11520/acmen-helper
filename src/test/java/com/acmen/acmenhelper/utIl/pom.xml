@@ -92,12 +92,6 @@
             <version>3.4.2</version>
         </dependency>
 
-        <!--阿里 FastJson依赖-->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.44</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/dom4j/dom4j -->
         <dependency>

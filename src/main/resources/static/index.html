@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh" class="no-js">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>demo</title>
+		<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+		<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.2.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+		<link rel="stylesheet" type="text/css" href="css/component.css" />
+		<link rel="stylesheet" type="text/css" href="css/bttn.min.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="heder-class">
+				<b>Acmen-Helper</b>
+			</div>
+			<section class="content">
+				<span class="input input--hoshi">
+					<input class="input__field input__field--hoshi" type="text" id="ip" value="127.0.0.1" />
+					<label class="input__label input__label--hoshi input__label--hoshi-color-In" for="ip">
+						<span class="input__label-content input__label-content--hoshi">ip</span>
+					</label>
+				</span>
+				<span class="input input--hoshi">
+					<input class="input__field input__field--hoshi" type="text" id="port" value="3306"/>
+					<label class="input__label input__label--hoshi input__label--hoshi-color-In" for="port">
+						<span class="input__label-content input__label-content--hoshi">port</span>
+					</label>
+				</span>
+				<span class="input input--hoshi">
+					<input class="input__field input__field--hoshi" type="text" id="userName" value="root"/>
+					<label class="input__label input__label--hoshi input__label--hoshi-color-In" for="userName">
+						<span class="input__label-content input__label-content--hoshi">用户名</span>
+					</label>
+				</span>
+				<span class="input input--hoshi">
+					<input class="input__field input__field--hoshi" type="password" id="pwd" value="root"/>
+					<label class="input__label input__label--hoshi input__label--hoshi-color-In" for="pwd">
+						<span class="input__label-content input__label-content--hoshi">密码</span>
+					</label>
+				</span>
+				<span class="input input--hoshi">
+					<input class="input__field input__field--hoshi" type="text" id="dbName" value="blog" style="margin-top: 30px;"/>
+					<label class="input__label input__label--hoshi input__label--hoshi-color-In" for="dbName" style="margin-top: 8px;">
+						<span class="input__label-content input__label-content--hoshi">数据库名称</span>
+					</label>
+				</span>
+				<span class="input input--hoshi">
+					<select class="input__field input__field--hoshi" id="db" >
+						<option>请选择数据库类型</option>
+						<option>Mysql</option>
+						<option>Oracle</option>
+					</select>
+					<label class="input__label input__label--hoshi input__label--hoshi-color-In" for="db">
+						<span class="input__label-content input__label-content--hoshi">数据库</span>
+					</label>
+				</span>
+				<div class="dbclass">
+							<button class="bttn-jelly bttn-md bttn-default" style="margin-bottom: 15px; width: 321px;" id="btquery">查询</button>
+					<br/>
+					<div id="tablex" style="display:none">
+						<span style="input input--hoshi">
+							<div class="checkbox" id="checkboxes">
+								<input class="tableList" type="checkbox" name="tableList"/><label style="font-size: 14px">weewqewq</label>
+							</div>
+						</span>
+								<table class="table-class">
+									<tr>
+										<td>
+											<input class="inputsmall" type="text" id="groupId" placeholder = "groupId" style="font-size: 14px"/>
+										</td>
+										<td>
+											<input class="inputsmall" type="text" id="atifactId" placeholder = "atifactId" style="font-size: 14px"/>
+										</td>
+										<td>
+											<input class="inputsmall" type="text" id="version" placeholder = "version" value="0.0.1-SNAPSHOT" style="font-size: 14px"/>
+										</td>
+									</tr>
+									<tr>
+
+										<td>
+											<input class="inputsmall" type="text" id="description" placeholder = "description" style="font-size: 14px"/>
+										</td>
+										<td>
+											<input class="inputsmall" type="text" id="projectName" placeholder = "projectName" style="font-size: 14px"/>
+										</td>
+										<td>
+											<input class="inputsmall" type="text" id="author" placeholder = "author" value="Acmen-helper" style="font-size: 14px"/>
+										</td>
+									</tr>
+									<tr>
+										<td  colspan='3'>
+											 <button class="bttn-jelly bttn-md bttn-primary" id="downloadButton" style="width: 321px; margin-top: 5px">下载</button>
+										</td>
+									</tr>
+								</table>
+					</div>
+				</div>
+				<br/>
+				<div class="line"></div>
+			</section>
+		</div><!-- /container -->
+		<script src="js/classie.js"></script>
+		<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+		<script>
+			(function() {
+				if (!String.prototype.trim) {
+					(function() {
+						var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+						String.prototype.trim = function() {
+							return this.replace(rtrim, '');
+						};
+					})();
+				}
+				[].slice.call( document.querySelectorAll( 'input.input__field' ) ).forEach( function( inputEl ) {
+					if( inputEl.value.trim() !== '' ) {
+						classie.add( inputEl.parentNode, 'input--filled');
+					}
+					inputEl.addEventListener( 'focus', onInputFocus );
+					inputEl.addEventListener( 'blur', onInputBlur );
+				} );
+
+				function onInputFocus( ev ) {
+					classie.add( ev.target.parentNode, 'input--filled' );
+				}
+
+				function onInputBlur( ev ) {
+					if( ev.target.value.trim() === '' ) {
+						classie.remove( ev.target.parentNode, 'input--filled' );
+					}
+				}
+			})();
+			var selectdb=document.getElementById("db");
+
+			if(selectdb.childNodes.length>0){
+				selectdb.parentNode.className += ' input--filled';
+			}
+
+			document.getElementById("btquery").addEventListener('click',function(){
+				    $.ajax({
+						url:"/db/connect",
+						method:"post",
+						data:{
+						    ip:$('#ip').val(),
+							dbName:$('#dbName').val(),
+                            port:$('#port').val(),
+							username:$('#userName').val(),
+							password:$('#pwd').val()
+						},
+						success:function (result) {
+                            var temp = document.getElementById("checkboxes");
+                            var tpl = '';
+                            for (var i = 0; i < result.data.length; i++) {
+                                tpl+='<div class="checkboxItem"><input type="checkbox" value="'+result.data[i]+'" name="tables"/><label style="font-size: 14px">'+result.data[i]+'</label> </div>'
+                            }
+                            temp.innerHTML = tpl;
+                            document.getElementById("tablex").style.display = 'block';
+                        },
+						error:function (err) {
+							alert("内部错误");
+                        }
+					})
+				})
+
+			document.getElementById("downloadButton").addEventListener('click',function () {
+
+                var arr = new Array() ;
+                var j=0
+                for (var i = 0; i < document.getElementsByName('tables').length; i++) {
+                    if (document.getElementsByName('tables')[i].checked) {
+                        arr[j++]=document.getElementsByName('tables')[i].value;
+                    }
+                }
+
+			    var data = {
+			        tableList:arr,
+                    groupId:$('#groupId').val(),
+                    artifactId:$('#atifactId').val(),
+					version:$('#version').val(),
+                    description:$('#description').val(),
+                    projectName:$('#projectName').val(),
+					author:$('#author').val()
+				}
+
+
+                var form=$("<form>");
+                form.attr("style","display:none");
+                form.attr("target","");
+                form.attr("method","post");
+                form.attr("action","/code/mysql/generator");
+                var input1=$("<input>");
+                input1.attr("type","hidden");
+                input1.attr("id","dataJSON");
+                input1.attr("name","dataJSON");
+                input1.attr("value",JSON.stringify(data));
+                $("body").append(form);//将表单放置在web中
+                form.append(input1);
+                form.submit();//表单提交
+			})
+		</script>
+	</body>
+</html>

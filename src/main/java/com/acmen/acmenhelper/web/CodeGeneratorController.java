@@ -6,6 +6,9 @@ import com.acmen.acmenhelper.common.ServiceResult;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.acmen.acmenhelper.service.ICodeGeneratorService;
+import com.acmen.acmenhelper.util.JsonUtils;
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -39,8 +42,11 @@ public class CodeGeneratorController {
     }
 
     @PostMapping("/code/mysql/generator")
-    public void codeGenerator(@RequestBody CodeDefinition codeDefinition,
+    public void codeGenerator(String dataJSON,
                               HttpServletResponse response) {
+        System.out.println(dataJSON);
+
+        CodeDefinition codeDefinition = JsonUtils.fromJSON(dataJSON,CodeDefinition.class);
         ServiceResult<String> res = codeGenerator.genCode(codeDefinition);
         if(!res.isSuccess()){
             //TODO 改成自定义异常
@@ -50,7 +56,7 @@ public class CodeGeneratorController {
         // 设置response
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/force-download");
-        response.addHeader("Content-Disposition", "attachment;filename=cyCode.zip");
+        response.addHeader("Content-Disposition", "attachment;filename="+codeDefinition.getProjectName()+".zip");
 
         doOutPut(path,response);
     }
