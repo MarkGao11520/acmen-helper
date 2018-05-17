@@ -26,6 +26,12 @@ public class CodeDefinitionDetail{
      */
     public static final String RESOURCES_PATH = "/src/main/resources";
 
+    /**
+     * 模板文件路径
+     */
+    public static final String TEMPLATE_FILE_PATH = RESOURCES_PATH+"/generator/template";
+
+
     private CodeDefinition codeDefinition;
 
     private String projectPath;

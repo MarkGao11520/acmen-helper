@@ -33,23 +33,17 @@ public abstract class AbstractCodeGenerator {
      */
     public void genCodeByCustomModelName(String tableName, String modelName) {
         genModelAndMapper(tableName, modelName);
-        genService(tableName, modelName);
-        genController(tableName, modelName);
+        genFtlCode(tableName, modelName);
     }
 
-    /**
-     * 生成controller层代码
-     * @param tableName
-     * @param modelName
-     */
-    protected abstract void genController(String tableName, String modelName);
+
 
     /**
-     * 生成service层代码
+     * 根据模板引擎生成代码
      * @param tableName
      * @param modelName
      */
-    protected abstract void genService(String tableName, String modelName);
+    protected abstract void genFtlCode(String tableName, String modelName);
 
     /**
      * 生成model层代码
