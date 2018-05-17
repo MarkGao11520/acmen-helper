@@ -6,18 +6,17 @@ import com.acmen.acmenhelper.common.ServiceResult;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.acmen.acmenhelper.service.ICodeGeneratorService;
-import com.sun.deploy.net.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -27,6 +26,7 @@ import java.io.OutputStream;
  * @date 2018/5/16
  */
 @RestController
+@Slf4j
 public class CodeGeneratorController {
 
     @Autowired
@@ -39,7 +39,7 @@ public class CodeGeneratorController {
     }
 
     @PostMapping("/code/mysql/generator")
-    public void codeGenerator(CodeDefinition codeDefinition,
+    public void codeGenerator(@RequestBody CodeDefinition codeDefinition,
                               HttpServletResponse response) {
         ServiceResult<String> res = codeGenerator.genCode(codeDefinition);
         if(!res.isSuccess()){
@@ -75,7 +75,11 @@ public class CodeGeneratorController {
             //TODO 改成自定义异常
             throw new RuntimeException("下载失败!");
         }finally{
-            file.deleteOnExit();
+            try {
+                FileUtils.forceDelete(file);
+            } catch (IOException e) {
+                log.error("删除下载文件失败",e);
+            }
         }
     }
 }

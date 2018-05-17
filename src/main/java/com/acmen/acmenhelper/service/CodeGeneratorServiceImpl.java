@@ -10,12 +10,16 @@ import com.acmen.acmenhelper.model.DBDefinition;
 import com.acmen.acmenhelper.util.ApplicationContextHolder;
 import com.acmen.acmenhelper.util.CompressUtil;
 import com.acmen.acmenhelper.util.DBUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -28,13 +32,15 @@ import java.util.List;
  * @date 2018/5/16
  */
 @Service
+@Lazy
+@Slf4j
 public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
 
-    @Value("${code-generator}")
-    private String codeGeneratorName;
+    @Value("${acmen.project.code-generator}")
+    private String codeGeneratorName = "defaultCodeGenerator";
 
-    @Value("${project-generator}")
-    private String projectGeneratorName;
+    @Value("${acmen.project.project-generator}")
+    private String projectGeneratorName = "defaultProjectGenerator";
 
     private IProjectGenerator projectGenerator = ApplicationContextHolder.getBean(projectGeneratorName);
 
@@ -79,10 +85,20 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
         defaultCodeGenerator.genCode();
 
         //4.打包项目，使用response输出
-        //TODO
-        String dist = "xxx.zip";
+        String dist = projectPath+".zip";
         CompressUtil.doZipCompress(projectPath,dist);
+
+        //5.删除项目
+        destoryProject(projectPath);
         return ServiceResult.of(dist);
+    }
+
+    private void destoryProject(String projectPath){
+        try {
+            FileUtils.deleteDirectory(new File(projectPath));
+        } catch (IOException e) {
+            log.error("删除下载文件失败",e);
+        }
     }
 
 

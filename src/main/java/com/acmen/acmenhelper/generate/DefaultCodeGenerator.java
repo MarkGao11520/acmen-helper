@@ -3,6 +3,7 @@ package com.acmen.acmenhelper.generate;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.DBDefinition;
+import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.google.common.collect.Maps;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.Data;
@@ -82,6 +83,13 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         DBDefinition dbDefinition = null;
         try {
             dbDefinition = (DBDefinition) session.getAttribute("dbDefinition");
+//            MysqlDBDefinition mysqlDBDefinition = new MysqlDBDefinition();
+//            mysqlDBDefinition.setIp("127.0.0.1");
+//            mysqlDBDefinition.setPort("3306");
+//            mysqlDBDefinition.setUsername("root");
+//            mysqlDBDefinition.setPassword("root");
+//            mysqlDBDefinition.setDbName("blog");
+//            dbDefinition = mysqlDBDefinition;
         } catch (Exception e) {
             //TODO 自定义异常
             throw new RuntimeException(LOG_PRE+"从session中获取DBDefinition失败");

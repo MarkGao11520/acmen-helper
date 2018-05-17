@@ -15,7 +15,7 @@ import static com.acmen.acmenhelper.model.CodeDefinitionDetail.TEMPLATE_FILE_PAT
  * @date 2018/5/17
  */
 @Configuration
-public class FreemarkerConfig {
+public class BeanConfig {
 
     @Bean
     public freemarker.template.Configuration cfg() throws IOException {
