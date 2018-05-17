@@ -1,6 +1,7 @@
 package com.acmen.acmenhelper.model;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @date 2018/5/16
  */
 @Data
+@ToString
 public class CodeDefinition {
 
     private List<String> tableList;

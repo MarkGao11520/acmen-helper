@@ -14,11 +14,6 @@ public class CompressUtil {
     private CompressUtil() {
     }
 
-    /**
-     * 执行压缩操作
-     * @param srcPathName 需要被压缩的文件/文件夹
-     */
-
 
     /**
      * 执行压缩操作

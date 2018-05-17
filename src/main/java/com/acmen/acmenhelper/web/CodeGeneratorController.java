@@ -8,6 +8,7 @@ import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.acmen.acmenhelper.service.ICodeGeneratorService;
 import com.sun.deploy.net.HttpResponse;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,13 +65,11 @@ public class CodeGeneratorController {
 
         try(InputStream input = FileUtils.openInputStream(file);
             OutputStream output = response.getOutputStream()){
-
             //缓冲区
             byte[] buffer = new byte[1024];
-            int bytesToRead;
             // 通过循环将读入的Word文件的内容输出到浏览器中
-            while((bytesToRead = input.read(buffer)) != -1) {
-                output.write(buffer, 0, bytesToRead);
+            while(input.read(buffer) != -1) {
+                IOUtils.write(buffer,output);
             }
         }catch(Exception ex){
             //TODO 改成自定义异常
