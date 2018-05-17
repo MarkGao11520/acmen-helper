@@ -36,11 +36,14 @@ import java.util.List;
 @Slf4j
 public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
 
-    @Value("${acmen.project.code-generator}")
-    private String codeGeneratorName = "defaultCodeGenerator";
+    @Value("${acmen.project.code_generator}")
+    private String codeGeneratorName;
 
-    @Value("${acmen.project.project-generator}")
+    @Value("${acmen.project.project_generator}")
     private String projectGeneratorName = "defaultProjectGenerator";
+
+    @Value("${acmen.project.generate_path}")
+    private String generatePath;
 
     private IProjectGenerator projectGenerator = ApplicationContextHolder.getBean(projectGeneratorName);
 
@@ -75,21 +78,26 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
     @Override
     public ServiceResult<String> genCode(CodeDefinition codeDefinition) {
         //1.生成项目骨架：
-        String projectPath = projectGenerator.generateProjectStructure(codeDefinition);
+        String projectName = projectGenerator.generateProjectStructure(codeDefinition);
+        String projectPath = generatePath+projectName;
+
         CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition,projectPath);
+        String dist;
+        try {
+            //2.使用mybatis的自动生成工具生成dao,mapper,pojo
+            //3.使用freemarker模板引擎生成service，controller层代码
+            AbstractCodeGenerator defaultCodeGenerator = ApplicationContextHolder.getBean(codeGeneratorName);
+            defaultCodeGenerator.setCodeDefinitionDetail(codeDefinitionDetail);
+            defaultCodeGenerator.genCode();
 
-        //2.使用mybatis的自动生成工具生成dao,mapper,pojo
-        //3.使用freemarker模板引擎生成service，controller层代码
-        AbstractCodeGenerator defaultCodeGenerator = ApplicationContextHolder.getBean(codeGeneratorName);
-        defaultCodeGenerator.setCodeDefinitionDetail(codeDefinitionDetail);
-        defaultCodeGenerator.genCode();
+            //4.打包项目，使用response输出
+            dist = generatePath+codeDefinition.getProjectName()+".zip";
+            CompressUtil.doZipCompress(projectPath,dist);
+        } finally {
+            //5.删除项目
+            destoryProject(projectPath);
+        }
 
-        //4.打包项目，使用response输出
-        String dist = projectPath+".zip";
-        CompressUtil.doZipCompress(projectPath,dist);
-
-        //5.删除项目
-        destoryProject(projectPath);
         return ServiceResult.of(dist);
     }
 

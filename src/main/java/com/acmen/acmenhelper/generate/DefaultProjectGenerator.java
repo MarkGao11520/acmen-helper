@@ -22,18 +22,18 @@ public class DefaultProjectGenerator implements IProjectGenerator {
     private final static String LOG_PRE = "生成项目基本骨架>";
 
     @Value("${acmen.project.generate_path}")
-    private String generatePath = "/Users/gaowenfeng/project/data/";
+    private String generatePath;
 
     @Override
     public String generateProjectStructure(CodeDefinition codeDefinition) {
 
         //1.生成springboot项目骨架
-        doGenerateProjectStructure(codeDefinition);
+        String buildInProjectName = doGenerateProjectStructure(codeDefinition);
 
         //2.将核心文件放入项目骨架
 
 
-        return generatePath+codeDefinition.getProjectName();
+        return buildInProjectName;
     }
 
 
@@ -41,11 +41,13 @@ public class DefaultProjectGenerator implements IProjectGenerator {
      * 执行具体的创建项目骨架的逻辑
      * @param codeDefinition
      */
-    private void doGenerateProjectStructure(CodeDefinition codeDefinition){
+    private String doGenerateProjectStructure(CodeDefinition codeDefinition){
+        String buildInProjectName = codeDefinition.getProjectName()+"_"+System.currentTimeMillis();
+
         Process pro = null;
         try{
             //1.1构建shell命令
-            String[] cmds = buildCmd(codeDefinition);
+            String[] cmds = buildCmd(codeDefinition,buildInProjectName);
 
             //1.2执行命令并阻塞至执行完成
             pro = Runtime.getRuntime().exec(cmds);
@@ -61,19 +63,20 @@ public class DefaultProjectGenerator implements IProjectGenerator {
         }finally {
             pro.destroy();
         }
+        return buildInProjectName;
     }
     /**
      * 构建创建项目的命令
      * @param codeDefinition
      * @return
      */
-    private String[] buildCmd(CodeDefinition codeDefinition){
+    private String[] buildCmd(CodeDefinition codeDefinition,String buildInProjectName){
         String shellPath = PROJECT_PATH+RESOURCES_PATH+"/build_springboot.sh";
 
         String[] cmds = new String[]{shellPath,
                 codeDefinition.getGroupId(),
                 codeDefinition.getArtifactId(),
-                generatePath+codeDefinition.getProjectName(),
+                generatePath+buildInProjectName,
                 codeDefinition.getDescription(),
                 codeDefinition.getVersion(),
                 };
