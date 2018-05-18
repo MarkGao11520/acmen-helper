@@ -78,10 +78,12 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
     @Override
     public ServiceResult<String> genCode(CodeDefinition codeDefinition) {
         //1.生成项目骨架：
-        String projectName = projectGenerator.generateProjectStructure(codeDefinition);
-        String projectPath = generatePath+projectName;
+        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition);
 
-        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition,projectPath);
+        String projectName = projectGenerator.generateProjectStructure(codeDefinitionDetail);
+        String projectPath = generatePath+projectName;
+        codeDefinitionDetail.setProjectPath(projectPath);
+
         String dist;
         try {
             //2.使用mybatis的自动生成工具生成dao,mapper,pojo
