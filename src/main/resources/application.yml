@@ -4,8 +4,9 @@ acmen:
     code_generator : defaultCodeGenerator
     project_generator : defaultProjectGenerator
   dependencies:
-    - tk.mybatis,mapper,3.4.2
+    - tk.mybatis,mapper-spring-boot-starter,1.1.1
     - com.github.pagehelper,pagehelper,4.2.1
+    - com.alibaba,fastjson,1.2.44
 
 
 

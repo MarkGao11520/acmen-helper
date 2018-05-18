@@ -1,4 +1,3 @@
-package ${basePackage}.core;
 
 /**
  * 项目常量

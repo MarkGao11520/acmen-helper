@@ -20,6 +20,11 @@ public abstract class AbstractCodeGenerator {
      * 如输入表名称 "t_user_detail" 将生成 TUserDetail、TUserDetailMapper、TUserDetailService ...
      */
     public void genCode() {
+        genConfigCode();
+        genCrudCode();
+    }
+
+    private void genCrudCode() {
         for (String tableName : this.codeDefinitionDetail.getCodeDefinition().getTableList()) {
             genCodeByCustomModelName(tableName, null);
         }
@@ -35,6 +40,12 @@ public abstract class AbstractCodeGenerator {
         genModelAndMapper(tableName, modelName);
         genFtlCode(tableName, modelName);
     }
+
+
+    /**
+     * 生成配置文件文件
+     */
+    protected abstract void genConfigCode();
 
 
 

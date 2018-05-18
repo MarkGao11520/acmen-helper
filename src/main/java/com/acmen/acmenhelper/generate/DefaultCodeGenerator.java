@@ -1,9 +1,9 @@
 package com.acmen.acmenhelper.generate;
 
+import com.acmen.acmenhelper.common.RequestHolder;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.DBDefinition;
-import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.google.common.collect.Maps;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.Data;
@@ -44,12 +44,31 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     private final static String LOG_PRE = "代码生成器>";
 
     @Autowired
-    private HttpSession session;
-
-    @Autowired
     private freemarker.template.Configuration cfg;
 
-    private final Context context = getContext();
+    private Context context;
+
+    @Override
+    public void setCodeDefinitionDetail(CodeDefinitionDetail codeDefinitionDetail) {
+        super.setCodeDefinitionDetail(codeDefinitionDetail);
+        this.context = getContext();
+    }
+
+    @Override
+    protected void genConfigCode() {
+        CodeDefinitionDetail codeDefinitionDetail = this.codeDefinitionDetail;
+        DBDefinition dbDefinition = getDbDefinitionFromSession();
+        Map<String, Object> data = buildConfigDataMap(codeDefinitionDetail, dbDefinition);
+
+        File ymlDevFile = new File(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH + "/application-dev.yml");
+        generateFtlCode(data,ymlDevFile,"application-dev.ftl");
+
+        File ymlFile = new File(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH + "/application.yml");
+        generateFtlCode(data,ymlFile,"application.ftl");
+
+        File mybatisConfigFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getCorePackage() + "/MybatisConfigurator.java");
+        generateFtlCode(data,mybatisConfigFile,"MybatisConfigurator.ftl");
+    }
 
     @Override
     protected void genFtlCode(String tableName, String modelName) {
@@ -58,27 +77,28 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         log.info(LOG_PRE+modelNameUpperCamel+"-controller/service/impl生成开始");
         try {
             CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
-            CodeDefinition codeDefinition = codeDefinitionDetail.getCodeDefinition();
 
             //构建占位符数据
-            Map<String,Object> data = buildDataMap(codeDefinition,modelNameUpperCamel,tableName);
+            Map<String,Object> data = buildCrudDataMap(modelNameUpperCamel,tableName);
 
             //生成java类
-            generateFtlCode(data,codeDefinitionDetail.getControllerPackage(),modelNameUpperCamel,"Controller.java","controller.ftl");
+            File controllerFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getControllerPackage() + modelNameUpperCamel + "Controller.java");
+            generateFtlCode(data,controllerFile,"controller.ftl");
 
             //生成server类
-            generateFtlCode(data,codeDefinitionDetail.getServicePackage(),modelNameUpperCamel,"Service.java","service.ftl");
+            File serviceFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getServicePackage() + modelNameUpperCamel + "Service.java");
+            generateFtlCode(data,serviceFile,"service.ftl");
 
             //生成server.impl类
-            generateFtlCode(data,codeDefinitionDetail.getServiceImplPackage(),modelNameUpperCamel,"ServiceImpl.java","service-impl.ftl");
+            File serviceImplFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getServiceImplPackage() + modelNameUpperCamel + "ServiceImpl.java");
+            generateFtlCode(data,serviceImplFile,"service-impl.ftl");
 
             log.info(LOG_PRE+modelNameUpperCamel+"-controller/service/impl生成成功");
         } catch (Exception e) {
             //TODO 自定义异常
-            throw new RuntimeException("生成controller/service/impl失败", e);
+            throw new RuntimeException("生成controller/service/impl失败",e);
         }
     }
-
 
     @Override
     protected void genModelAndMapper(String tableName, String modelName) {
@@ -119,14 +139,54 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         log.info(LOG_PRE+modelName + "Mapper.xml 生成成功");
     }
 
+
+    /**
+     * 构建Crud模板的map
+     * @param tableName
+     * @param modelNameUpperCamel
+     * @return
+     */
+    private Map<String,Object> buildCrudDataMap(String modelNameUpperCamel,String tableName){
+        Map<String, Object> data = Maps.newHashMap();
+
+        data.put("date", this.codeDefinitionDetail.getCodeDefinition().getAuthor());
+        data.put("author", codeDefinitionDetail.getCodeDefinition().getAuthor());
+
+        data.put("baseRequestMapping", modelNameConvertMappingPath(modelNameUpperCamel));
+        data.put("modelNameUpperCamel", modelNameUpperCamel);
+        data.put("modelNameLowerCamel", tableNameConvertLowerCamel(tableName));
+
+        data.put("basePackage", codeDefinitionDetail.getBasePackage());
+        return data;
+    }
+
+    /**
+     * 根据配置类模板的data
+     * @param codeDefinitionDetail
+     * @param dbDefinition
+     * @return
+     */
+    private Map<String, Object> buildConfigDataMap(CodeDefinitionDetail codeDefinitionDetail, DBDefinition dbDefinition) {
+        Map<String,Object> data = Maps.newHashMap();
+        data.put("driver_class",dbDefinition.getDriverClass());
+        data.put("url",dbDefinition.getUrl());
+        data.put("username",dbDefinition.getUsername());
+        data.put("password",dbDefinition.getPassword());
+        data.put("coreMapperPath",codeDefinitionDetail.getMapperInterfaceReference());
+        data.put("type_aliases_package",codeDefinitionDetail.getModulePackage());
+
+        data.put("date", codeDefinitionDetail.getCodeDefinition().getAuthor());
+        data.put("author", codeDefinitionDetail.getCodeDefinition().getAuthor());
+        data.put("basePackage", codeDefinitionDetail.getBasePackage());
+        return data;
+    }
+
+    /**
+     * 获取Mybatis上下文
+     * @return
+     */
     private Context getContext() {
-        DBDefinition dbDefinition = null;
-        try {
-            dbDefinition = (DBDefinition) session.getAttribute("dbDefinition");
-        } catch (Exception e) {
-            //TODO 自定义异常
-            throw new RuntimeException(LOG_PRE+"从session中获取DBDefinition失败");
-        }
+        DBDefinition dbDefinition = getDbDefinitionFromSession();
         CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
 
         Context context = new Context(ModelType.FLAT);
@@ -166,37 +226,14 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     }
 
     /**
-     * 构建模板引擎生成的map
-     * @param codeDefinition
-     * @param tableName
-     * @param modelNameUpperCamel
-     * @return
-     */
-    private Map<String,Object> buildDataMap(CodeDefinition codeDefinition,String modelNameUpperCamel,String tableName){
-        Map<String, Object> data = Maps.newHashMap();
-
-        data.put("date", codeDefinition.getAuthor());
-        data.put("author", codeDefinitionDetail.getCodeDefinition().getAuthor());
-
-        data.put("baseRequestMapping", modelNameConvertMappingPath(modelNameUpperCamel));
-        data.put("modelNameUpperCamel", modelNameUpperCamel);
-        data.put("modelNameLowerCamel", tableNameConvertLowerCamel(tableName));
-
-        data.put("basePackage", codeDefinitionDetail.getBasePackage());
-        return data;
-    }
-
-    /**
      * 生成代码文件
      * @param data
-     * @param modelNameUpperCamel
-     * @param fileName
+     * @param file
      * @param ftlName
      * @return
      */
-    private void generateFtlCode(Map<String,Object> data,String filePackage,String modelNameUpperCamel,String fileName,String ftlName){
+    private void generateFtlCode(Map<String,Object> data,File file,String ftlName){
         try {
-            File file = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + filePackage + modelNameUpperCamel + fileName);
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -207,9 +244,31 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         }
     }
 
+    /**
+     * 创建model名称
+     * @param tableName
+     * @param modelName
+     * @return
+     */
     private String buildModelNameUpperCamel(String tableName, String modelName){
         return StringUtils.isEmpty(modelName) ? tableNameConvertUpperCamel(tableName) : modelName;
     }
+
+    /**
+     * 获取session
+     * @return
+     */
+    private DBDefinition getDbDefinitionFromSession(){
+        DBDefinition dbDefinition = null;
+        try {
+            dbDefinition = (DBDefinition) RequestHolder.getCurrentRequest().getSession().getAttribute("dbDefinition");
+        } catch (Exception e) {
+            //TODO 自定义异常
+            throw new RuntimeException(LOG_PRE+"从session中获取DBDefinition失败",e);
+        }
+        return dbDefinition;
+    }
+
 
     /**
      * 测试

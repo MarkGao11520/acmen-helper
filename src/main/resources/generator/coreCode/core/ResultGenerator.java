@@ -1,4 +1,4 @@
-package ${basePackage}.core;
+
 
 /**
  * 响应结果生成工具

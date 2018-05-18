@@ -43,11 +43,6 @@ public class DefaultProjectGenerator implements IProjectGenerator {
     private DependenciesConfig dependenciesConfig;
 
 
-    private static final List<String> dependencies = Lists.newArrayList();
-
-    static {
-        dependencies.add("tk.mybatis,mapper,3.4.2");
-    }
 
     @Override
     public String generateProjectStructure(CodeDefinitionDetail codeDefinitionDetail) {
@@ -68,14 +63,14 @@ public class DefaultProjectGenerator implements IProjectGenerator {
         }
 
         //3.修改核心文件的包名
-        File configurerDir = new File(targetPath+"/configurer");
+        File configurerDir = new File(targetPath+"/core");
         for (File configurerFile : configurerDir.listFiles()) {
-            modifyFileContent(configurerFile,"basePackage",codeDefinitionDetail.getBasePackage());
+            appendFileContent(configurerFile,"package "+codeDefinitionDetail.getBasePackage()+".core;\n");
         }
 
         //4.修改pom文件追加依赖
         String pomPath = generatePath+buildInProjectName+"/pom.xml";
-        doAppendPomDependencies(dependencies,pomPath);
+        doAppendPomDependencies(dependenciesConfig.getDependencies(),pomPath);
 
         //5.修改application.properties
 
@@ -154,42 +149,22 @@ public class DefaultProjectGenerator implements IProjectGenerator {
     }
 
     /**
-     * 修改文件内容
+     * 最近文件内容
      * @param file
-     * @param oldstr
-     * @param newStr
+     * @param headerStr
      */
-    private static void modifyFileContent(File file, String oldstr, String newStr) {
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(file, "rw");
-            String line = null;
-            //记住上一次的偏移量
-            long lastPoint = 0;
-            while ((line = raf.readLine()) != null) {
-                long ponit = raf.getFilePointer();
-                if(line.contains(oldstr)){
-                    String str=line.replace(oldstr, newStr);
-                    System.out.println("cur_pint:"+raf.getFilePointer()+",lastpoint:"+lastPoint);
-                    raf.seek(lastPoint);
-                    System.out.println("cur_pint:"+raf.getFilePointer()+",lastpoint:"+lastPoint);
-                    raf.writeBytes(str);
-                    System.out.println("cur_pint:"+raf.getFilePointer()+",lastpoint:"+lastPoint);
-                    raf.seek(lastPoint);
-                    System.out.println("cur_pint:"+raf.getFilePointer()+",lastpoint:"+lastPoint);
-                    raf.readLine();
-                    System.out.println("cur_pint:"+raf.getFilePointer()+",lastpoint:"+lastPoint);
-                    ponit = raf.getFilePointer();
-                }
-                lastPoint = ponit;
-            }
+    private static void appendFileContent(File file, String headerStr) {
+        byte[] header = headerStr.getBytes();
+        try(RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+            int srcLength = (int)raf.length() ;
+            byte[] buff = new byte[srcLength];
+            raf.read(buff , 0, srcLength);
+            raf.seek(0);
+            raf.write(header);
+            raf.seek(header.length);
+            raf.write(buff);
         } catch (Exception e) {
-            throw new RuntimeException(LOG_PRE+"修改核心文件内容异常");
-        } finally {
-            try {
-                raf.close();
-            } catch (IOException e) {
-            }
+            throw new RuntimeException(LOG_PRE+"追加核心文件内容异常");
         }
     }
 

@@ -49,6 +49,8 @@ public class CodeDefinitionDetail{
 
     private String controllerPackage;
 
+    private String corePackage;
+
     private String mapperInterfaceReference;
 
     public CodeDefinitionDetail(CodeDefinition codeDefinition){
@@ -66,6 +68,7 @@ public class CodeDefinitionDetail{
         this.servicePackage = packageConvertPath(this.basePackage+".service");
         this.serviceImplPackage = packageConvertPath(this.servicePackage+".impl");
         this.controllerPackage = packageConvertPath(this.basePackage+".web");
+        this.corePackage = packageConvertPath(this.basePackage+".core");
         this.mapperInterfaceReference = this.basePackage+".core.Mapper";
     }
 

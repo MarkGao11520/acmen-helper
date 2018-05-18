@@ -1,4 +1,4 @@
-package ${basePackage}.core;
+
 
 import com.alibaba.fastjson.JSON;
 
