@@ -1,5 +1,6 @@
 package com.acmen.acmenhelper.generate;
 
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.DBDefinition;
@@ -51,7 +52,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
 
 
     @Override
-    protected void genFtlCode(String tableName, String modelName) {
+    protected void genFtlCode(String tableName, String modelName) throws GlobalException {
         String modelNameUpperCamel = buildModelNameUpperCamel(tableName, modelName);
 
         log.info(LOG_PRE+modelNameUpperCamel+"-controller/service/impl生成开始");
@@ -73,13 +74,12 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
 
             log.info(LOG_PRE+modelNameUpperCamel+"-controller/service/impl生成成功");
         } catch (Exception e) {
-            //TODO 自定义异常
-            throw new RuntimeException("生成controller/service/impl失败", e);
+            throw new GlobalException(1 , "生成controller/service/impl失败" , e);
         }
     }
 
     @Override
-    protected void genModelAndMapper(String tableName, String modelName) {
+    protected void genModelAndMapper(String tableName, String modelName) throws GlobalException {
         DBDefinition dbDefinition = null;
         try {
             dbDefinition = (DBDefinition) session.getAttribute("dbDefinition");
@@ -91,8 +91,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
 //            mysqlDBDefinition.setDbName("blog");
 //            dbDefinition = mysqlDBDefinition;
         } catch (Exception e) {
-            //TODO 自定义异常
-            throw new RuntimeException(LOG_PRE+"从session中获取DBDefinition失败");
+            throw new GlobalException(1 , "LOG_PRE" + "从session中获取DBDefinition失败" , e);
         }
 
         CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
@@ -151,13 +150,11 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
             generator = new MyBatisGenerator(config, callback, warnings);
             generator.generate(null);
         } catch (Exception e) {
-            //TODO 自定义异常
-            throw new RuntimeException("生成Model和Mapper失败", e);
+            throw new GlobalException(1 , "生成Model和Mapper失败", e);
         }
 
         if (generator.getGeneratedJavaFiles().isEmpty() || generator.getGeneratedXmlFiles().isEmpty()) {
-            //TODO 自定义异常
-            throw new RuntimeException("生成Model和Mapper失败：" + warnings);
+            throw new GlobalException(1 , "生成Model和Mapper失败：" + warnings , null);
         }
         if (StringUtils.isEmpty(modelName)) {
             modelName = tableNameConvertUpperCamel(tableName);
@@ -196,7 +193,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
      * @param ftlName
      * @return
      */
-    private void generateFtlCode(Map<String,Object> data,String filePackage,String modelNameUpperCamel,String fileName,String ftlName){
+    private void generateFtlCode(Map<String,Object> data,String filePackage,String modelNameUpperCamel,String fileName,String ftlName) throws GlobalException {
         try {
             File file = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + filePackage + modelNameUpperCamel + fileName);
             if (!file.getParentFile().exists()) {
@@ -205,7 +202,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
             cfg.getTemplate(ftlName).process(data,
                     new FileWriter(file));
         } catch (Exception e) {
-            throw new RuntimeException(LOG_PRE+e.getMessage());
+            throw new GlobalException(1 , LOG_PRE+"生成代码文件异常，请重试" , e);
         }
     }
 
@@ -218,7 +215,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, GlobalException {
         DefaultCodeGenerator defaultCodeGenerator = new DefaultCodeGenerator();
         CodeDefinition codeDefinition = new CodeDefinition();
         codeDefinition.setArtifactId("demo");

@@ -1,5 +1,6 @@
 package com.acmen.acmenhelper.generate;
 
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -25,7 +26,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
     private String generatePath;
 
     @Override
-    public String generateProjectStructure(CodeDefinition codeDefinition) {
+    public String generateProjectStructure(CodeDefinition codeDefinition) throws GlobalException {
 
         //1.生成springboot项目骨架
         String buildInProjectName = doGenerateProjectStructure(codeDefinition);
@@ -41,7 +42,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
      * 执行具体的创建项目骨架的逻辑
      * @param codeDefinition
      */
-    private String doGenerateProjectStructure(CodeDefinition codeDefinition){
+    private String doGenerateProjectStructure(CodeDefinition codeDefinition) throws GlobalException {
         String buildInProjectName = codeDefinition.getProjectName()+"_"+System.currentTimeMillis();
 
         Process pro = null;
@@ -58,8 +59,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
             lines.forEach(line->log.info(LOG_PRE+"参数=【"+codeDefinition+"】,输出=【"+line+"】"));
         } catch (Exception e) {
             log.error(LOG_PRE+"错误:"+e.getMessage());
-            //TODO 自定义异常
-            throw new RuntimeException(LOG_PRE+"错误");
+            throw new GlobalException(1 , LOG_PRE + "错误" , e);
         }finally {
             pro.destroy();
         }
@@ -87,7 +87,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
      * 测试
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws GlobalException {
         CodeDefinition codeDefinition = new CodeDefinition();
         codeDefinition.setArtifactId("demo");
         codeDefinition.setGroupId("com.example");

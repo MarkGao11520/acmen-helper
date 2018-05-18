@@ -6,6 +6,7 @@ package com.acmen.acmenhelper.exception;
 public class GlobalException extends Exception {
     private int code;
     private String msg;
+    private Throwable e;
 
     public int getCode() {
         return code;
@@ -23,8 +24,18 @@ public class GlobalException extends Exception {
         return msg;
     }
 
-    public GlobalException(int code , String msg) {
-        super(msg);
+    public Throwable getE() {
+        return e;
+    }
+
+    public void setE(Throwable e) {
+        this.e = e;
+    }
+
+    public GlobalException(int code , String msg , Throwable e) {
+        super(e);
         this.code = code;
+        this.msg = msg;
+        this.e = e;
     }
 }

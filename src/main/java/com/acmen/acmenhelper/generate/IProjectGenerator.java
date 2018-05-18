@@ -1,5 +1,6 @@
 package com.acmen.acmenhelper.generate;
 
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 
 /**
@@ -13,5 +14,5 @@ public interface IProjectGenerator {
      * @param codeDefinition
      * @return
      */
-    String generateProjectStructure(CodeDefinition codeDefinition);
+    String generateProjectStructure(CodeDefinition codeDefinition) throws GlobalException;
 }
