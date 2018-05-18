@@ -1,0 +1,13 @@
+acmen:
+  project:
+    generate_path : /Users/gaowenfeng/project/data/
+    code_generator : defaultCodeGenerator
+    project_generator : defaultProjectGenerator
+  dependencies:
+    - tk.mybatis,mapper,3.4.2
+    - com.github.pagehelper,pagehelper,4.2.1
+
+
+
+
+

@@ -11,7 +11,6 @@ import static com.acmen.acmenhelper.util.NameConvertUtil.packageConvertPath;
  * @date 2018/5/16
  */
 @Data
-@Getter
 public class CodeDefinitionDetail{
     /**
      * 项目在硬盘上的基础路径
@@ -51,6 +50,10 @@ public class CodeDefinitionDetail{
     private String controllerPackage;
 
     private String mapperInterfaceReference;
+
+    public CodeDefinitionDetail(CodeDefinition codeDefinition){
+        this(codeDefinition,null);
+    }
 
 
     public CodeDefinitionDetail(CodeDefinition codeDefinition,String projectPath){

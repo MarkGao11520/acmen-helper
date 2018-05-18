@@ -1,6 +1,6 @@
 package com.acmen.acmenhelper.generate;
 
-import com.acmen.acmenhelper.model.CodeDefinition;
+import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 
 /**
  * 项目结构生成器接口
@@ -13,5 +13,5 @@ public interface IProjectGenerator {
      * @param codeDefinition
      * @return
      */
-    String generateProjectStructure(CodeDefinition codeDefinition);
+    String generateProjectStructure(CodeDefinitionDetail codeDefinition);
 }
