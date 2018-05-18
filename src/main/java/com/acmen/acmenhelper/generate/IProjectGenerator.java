@@ -14,4 +14,5 @@ public interface IProjectGenerator {
      * @return
      */
     String generateProjectStructure(CodeDefinitionDetail codeDefinition);
+
 }

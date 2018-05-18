@@ -1,5 +1,6 @@
 package com.acmen.acmenhelper.util;
 
+import com.acmen.acmenhelper.exception.GlobalException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.FileSet;
@@ -23,7 +24,7 @@ public class CompressUtil {
     public static void doZipCompress(String srcPathName, String dest) {
         File srcdir = new File(srcPathName);
         if (!srcdir.exists()){
-            throw new RuntimeException(srcPathName + "不存在！");
+            throw new GlobalException(1 , srcPathName + "不存在" , null);
         }
         File zipFile = new File(dest);
         Project prj = new Project();

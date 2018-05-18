@@ -2,6 +2,7 @@ package com.acmen.acmenhelper.service;
 
 import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.DBDefinition;
 
@@ -18,12 +19,12 @@ public interface ICodeGeneratorService {
      * @param dbDefinition
      * @return
      */
-     ServiceMultiResult<String> getTableList(DBDefinition dbDefinition);
+     ServiceMultiResult<String> getTableList(DBDefinition dbDefinition) throws GlobalException;
 
     /**
      * 代码生成的核心方法
      * @param codeDefinition
      * @return
      */
-     ServiceResult<String> genCode(CodeDefinition codeDefinition);
+     ServiceResult<String> genCode(CodeDefinition codeDefinition) throws GlobalException;
 }

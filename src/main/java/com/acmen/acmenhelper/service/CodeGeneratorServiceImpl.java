@@ -2,6 +2,7 @@ package com.acmen.acmenhelper.service;
 
 import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.generate.AbstractCodeGenerator;
 import com.acmen.acmenhelper.generate.IProjectGenerator;
 import com.acmen.acmenhelper.model.CodeDefinition;
@@ -52,7 +53,7 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
 
 
     @Override
-    public ServiceMultiResult<String> getTableList(DBDefinition dbDefinition) {
+    public ServiceMultiResult<String> getTableList(DBDefinition dbDefinition) throws GlobalException {
         List<String> tables = new ArrayList<>();
 
         //创建驱动器
@@ -66,8 +67,7 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
                 tables.add(rs.getString("TABLE_NAME"));
             }
         } catch (Exception e) {
-            //TODO 改成自定义异常
-            throw new RuntimeException("数据库连接信息错误,或数据库不存在数据表!");
+            throw new GlobalException(1 , "数据库连接信息错误,或数据库不存在数据表!" , e);
         } finally {
             DBUtil.killConnection(rs,conn);
         }
@@ -76,7 +76,7 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
     }
 
     @Override
-    public ServiceResult<String> genCode(CodeDefinition codeDefinition) {
+    public ServiceResult<String> genCode(CodeDefinition codeDefinition) throws GlobalException {
         //1.生成项目骨架：
         CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition);
 

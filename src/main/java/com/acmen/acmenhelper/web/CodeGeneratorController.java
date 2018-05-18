@@ -3,20 +3,22 @@ package com.acmen.acmenhelper.web;
 import com.acmen.acmenhelper.common.ApiResponse;
 import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.acmen.acmenhelper.service.ICodeGeneratorService;
 import com.acmen.acmenhelper.util.JsonUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -36,21 +38,20 @@ public class CodeGeneratorController {
     private ICodeGeneratorService codeGenerator;
 
     @PostMapping("/db/connect")
-    public ApiResponse getTableList(MysqlDBDefinition mysqlDBDefinition){
+    public ApiResponse getTableList(MysqlDBDefinition mysqlDBDefinition) throws GlobalException {
         ServiceMultiResult<String> res = codeGenerator.getTableList(mysqlDBDefinition);
         return ApiResponse.ofSuccess(res.getResult());
     }
 
     @PostMapping("/code/mysql/generator")
     public void codeGenerator(String dataJSON,
-                              HttpServletResponse response) {
+                              HttpServletResponse response) throws GlobalException {
         System.out.println(dataJSON);
 
         CodeDefinition codeDefinition = JsonUtils.fromJSON(dataJSON,CodeDefinition.class);
         ServiceResult<String> res = codeGenerator.genCode(codeDefinition);
         if(!res.isSuccess()){
-            //TODO 改成自定义异常
-            throw new RuntimeException("未知异常");
+            throw new GlobalException(1 , "未知异常" , null);
         }
         String path = res.getResult();
         // 设置response
@@ -78,8 +79,12 @@ public class CodeGeneratorController {
                 IOUtils.write(buffer,output);
             }
         }catch(Exception ex){
-            //TODO 改成自定义异常
-            throw new RuntimeException("下载失败!");
+            try {
+                // TODO: 2018/5/18 给用户一个更友好的提示 
+                response.getWriter().print("下载失败");
+            } catch (IOException e) {
+                log.error("下载文件失败",e);
+            }
         }finally{
             try {
                 FileUtils.forceDelete(file);
@@ -87,5 +92,13 @@ public class CodeGeneratorController {
                 log.error("删除下载文件失败",e);
             }
         }
+    }
+
+    @ExceptionHandler(value = GlobalException.class)
+    public String resolveException(HttpServletRequest request , HttpServletResponse response , Exception e) {
+        GlobalException ex = (GlobalException)e;
+        log.error("Exception:{}" , ex.getE());
+        ApiResponse apiResponse = new ApiResponse(ex.getCode() , ex.getMessage());
+        return JSON.toJSONString(apiResponse);
     }
 }

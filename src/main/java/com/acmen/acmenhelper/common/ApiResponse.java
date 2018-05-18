@@ -38,6 +38,11 @@ public class ApiResponse {
         return new ApiResponse(status.getCode(), status.getStandardMessage(), null);
     }
 
+    public ApiResponse(int code , String message) {
+        this.code = code;
+        this.message = message;
+    }
+
 
 
     @Getter

@@ -1,6 +1,7 @@
 package com.acmen.acmenhelper.generate;
 
 import com.acmen.acmenhelper.config.DependenciesConfig;
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.util.NameConvertUtil;
@@ -59,7 +60,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
             targetPath = generatePath+buildInProjectName+JAVA_PATH+NameConvertUtil.packageConvertPath(codeDefinitionDetail.getBasePackage());
             FileUtils.copyDirectory(new File(sourcePath),new File(targetPath));
         } catch (IOException e) {
-            throw new RuntimeException(LOG_PRE+"拷贝文件异常,sourcePath=["+sourcePath+"],targetPath=["+targetPath+"]",e);
+            throw new GlobalException(1 , LOG_PRE+"拷贝文件异常,sourcePath=["+sourcePath+"],targetPath=["+targetPath+"]",e);
         }
 
         //3.修改核心文件的包名
@@ -99,8 +100,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
             lines.forEach(line->log.info(LOG_PRE+"参数=【"+codeDefinition+"】,输出=【"+line+"】"));
         } catch (Exception e) {
             log.error(LOG_PRE+"错误:"+e.getMessage());
-            //TODO 自定义异常
-            throw new RuntimeException(LOG_PRE+"错误");
+            throw new GlobalException(1 , LOG_PRE + "错误" , e);
         }finally {
             pro.destroy();
         }
@@ -164,7 +164,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
             raf.seek(header.length);
             raf.write(buff);
         } catch (Exception e) {
-            throw new RuntimeException(LOG_PRE+"追加核心文件内容异常");
+            throw new GlobalException(1 , LOG_PRE+"追加核心文件内容异常" , e);
         }
     }
 

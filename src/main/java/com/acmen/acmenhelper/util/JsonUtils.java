@@ -1,5 +1,6 @@
 package com.acmen.acmenhelper.util;
 
+import com.acmen.acmenhelper.exception.GlobalException;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,13 +19,8 @@ public class JsonUtils {
         T object = null;
         try {
             object = objectMapper.readValue(jsonString, clazz);
-        } catch (JsonGenerationException e) {
-            //TODO 自定义异常
-            throw new RuntimeException("JsonGenerationException", e);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException("JsonMappingException", e);
-        } catch (IOException e) {
-            throw new RuntimeException("IOException", e);
+        } catch (Exception e) {
+            throw new GlobalException(1 , "json转换异常" , e);
         }
         return object;
     }
