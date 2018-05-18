@@ -49,6 +49,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     @Autowired
     private freemarker.template.Configuration cfg;
 
+    private final Context context = getContext();
 
     @Override
     protected void genFtlCode(String tableName, String modelName) {
@@ -78,58 +79,9 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         }
     }
 
+
     @Override
     protected void genModelAndMapper(String tableName, String modelName) {
-        DBDefinition dbDefinition = null;
-        try {
-            dbDefinition = (DBDefinition) session.getAttribute("dbDefinition");
-//            MysqlDBDefinition mysqlDBDefinition = new MysqlDBDefinition();
-//            mysqlDBDefinition.setIp("127.0.0.1");
-//            mysqlDBDefinition.setPort("3306");
-//            mysqlDBDefinition.setUsername("root");
-//            mysqlDBDefinition.setPassword("root");
-//            mysqlDBDefinition.setDbName("blog");
-//            dbDefinition = mysqlDBDefinition;
-        } catch (Exception e) {
-            //TODO 自定义异常
-            throw new RuntimeException(LOG_PRE+"从session中获取DBDefinition失败");
-        }
-
-        CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
-        Context context = new Context(ModelType.FLAT);
-        context.setId("Potato");
-        context.setTargetRuntime("MyBatis3Simple");
-        context.addProperty(PropertyRegistry.CONTEXT_BEGINNING_DELIMITER, "`");
-        context.addProperty(PropertyRegistry.CONTEXT_ENDING_DELIMITER, "`");
-
-        JDBCConnectionConfiguration jdbcConnectionConfiguration = new JDBCConnectionConfiguration();
-        jdbcConnectionConfiguration.setConnectionURL(dbDefinition.getUrl());
-        jdbcConnectionConfiguration.setUserId(dbDefinition.getUsername());
-        jdbcConnectionConfiguration.setPassword(dbDefinition.getPassword());
-        jdbcConnectionConfiguration.setDriverClass(dbDefinition.getDriverClass());
-        context.setJdbcConnectionConfiguration(jdbcConnectionConfiguration);
-
-        PluginConfiguration pluginConfiguration = new PluginConfiguration();
-        pluginConfiguration.setConfigurationType("tk.mybatis.mapper.generator.MapperPlugin");
-        pluginConfiguration.addProperty("mappers", codeDefinitionDetail.getMapperInterfaceReference());
-        context.addPluginConfiguration(pluginConfiguration);
-
-        JavaModelGeneratorConfiguration javaModelGeneratorConfiguration = new JavaModelGeneratorConfiguration();
-        javaModelGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + JAVA_PATH);
-        javaModelGeneratorConfiguration.setTargetPackage(codeDefinitionDetail.getModulePackage());
-        context.setJavaModelGeneratorConfiguration(javaModelGeneratorConfiguration);
-
-        SqlMapGeneratorConfiguration sqlMapGeneratorConfiguration = new SqlMapGeneratorConfiguration();
-        sqlMapGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH);
-        sqlMapGeneratorConfiguration.setTargetPackage("mapper");
-        context.setSqlMapGeneratorConfiguration(sqlMapGeneratorConfiguration);
-
-        JavaClientGeneratorConfiguration javaClientGeneratorConfiguration = new JavaClientGeneratorConfiguration();
-        javaClientGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + JAVA_PATH);
-        javaClientGeneratorConfiguration.setTargetPackage(codeDefinitionDetail.getMapperPackage());
-        javaClientGeneratorConfiguration.setConfigurationType("XMLMAPPER");
-        context.setJavaClientGeneratorConfiguration(javaClientGeneratorConfiguration);
-
         TableConfiguration tableConfiguration = new TableConfiguration(context);
         tableConfiguration.setTableName(tableName);
         if (StringUtils.isNotEmpty(modelName)){
@@ -165,6 +117,52 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         log.info(LOG_PRE+modelName + ".java 生成成功");
         log.info(LOG_PRE+modelName + "Mapper.java 生成成功");
         log.info(LOG_PRE+modelName + "Mapper.xml 生成成功");
+    }
+
+    private Context getContext() {
+        DBDefinition dbDefinition = null;
+        try {
+            dbDefinition = (DBDefinition) session.getAttribute("dbDefinition");
+        } catch (Exception e) {
+            //TODO 自定义异常
+            throw new RuntimeException(LOG_PRE+"从session中获取DBDefinition失败");
+        }
+        CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
+
+        Context context = new Context(ModelType.FLAT);
+        context.setId("Potato");
+        context.setTargetRuntime("MyBatis3Simple");
+        context.addProperty(PropertyRegistry.CONTEXT_BEGINNING_DELIMITER, "`");
+        context.addProperty(PropertyRegistry.CONTEXT_ENDING_DELIMITER, "`");
+
+        JDBCConnectionConfiguration jdbcConnectionConfiguration = new JDBCConnectionConfiguration();
+        jdbcConnectionConfiguration.setConnectionURL(dbDefinition.getUrl());
+        jdbcConnectionConfiguration.setUserId(dbDefinition.getUsername());
+        jdbcConnectionConfiguration.setPassword(dbDefinition.getPassword());
+        jdbcConnectionConfiguration.setDriverClass(dbDefinition.getDriverClass());
+        context.setJdbcConnectionConfiguration(jdbcConnectionConfiguration);
+
+        PluginConfiguration pluginConfiguration = new PluginConfiguration();
+        pluginConfiguration.setConfigurationType("tk.mybatis.mapper.generator.MapperPlugin");
+        pluginConfiguration.addProperty("mappers", codeDefinitionDetail.getMapperInterfaceReference());
+        context.addPluginConfiguration(pluginConfiguration);
+
+        JavaModelGeneratorConfiguration javaModelGeneratorConfiguration = new JavaModelGeneratorConfiguration();
+        javaModelGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + JAVA_PATH);
+        javaModelGeneratorConfiguration.setTargetPackage(codeDefinitionDetail.getModulePackage());
+        context.setJavaModelGeneratorConfiguration(javaModelGeneratorConfiguration);
+
+        SqlMapGeneratorConfiguration sqlMapGeneratorConfiguration = new SqlMapGeneratorConfiguration();
+        sqlMapGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH);
+        sqlMapGeneratorConfiguration.setTargetPackage("mapper");
+        context.setSqlMapGeneratorConfiguration(sqlMapGeneratorConfiguration);
+
+        JavaClientGeneratorConfiguration javaClientGeneratorConfiguration = new JavaClientGeneratorConfiguration();
+        javaClientGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + JAVA_PATH);
+        javaClientGeneratorConfiguration.setTargetPackage(codeDefinitionDetail.getMapperPackage());
+        javaClientGeneratorConfiguration.setConfigurationType("XMLMAPPER");
+        context.setJavaClientGeneratorConfiguration(javaClientGeneratorConfiguration);
+        return context;
     }
 
     /**
@@ -239,8 +237,5 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         defaultCodeGenerator.setCfg(cfg);
         defaultCodeGenerator.genCodeByCustomModelName("blog",null);
     }
-
-
-
 
 }
