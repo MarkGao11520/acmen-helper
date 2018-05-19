@@ -1,11 +1,10 @@
 package com.acmen.acmenhelper.generate;
 
-import com.acmen.acmenhelper.config.DependenciesConfig;
+import com.acmen.acmenhelper.config.ProjectConfig;
 import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.util.NameConvertUtil;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,8 +15,6 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,21 +29,17 @@ import static com.acmen.acmenhelper.model.CodeDefinitionDetail.*;
  * @author gaowenfeng
  * @date 2018/5/16
  */
-@Service("defaultProjectGenerator")
 @Slf4j
 public class DefaultProjectGenerator implements IProjectGenerator {
     private final static String LOG_PRE = "生成项目基本骨架>";
 
-    @Value("${acmen.project.generate_path}")
-    private String generatePath;
-
     @Autowired
-    private DependenciesConfig dependenciesConfig;
+    private ProjectConfig projectConfig;
 
 
 
     @Override
-    public String generateProjectStructure(CodeDefinitionDetail codeDefinitionDetail) {
+    public void generateProjectStructure(CodeDefinitionDetail codeDefinitionDetail) {
 
         //1.生成springboot项目骨架
         CodeDefinition codeDefinition = codeDefinitionDetail.getCodeDefinition();
@@ -57,7 +50,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
         String targetPath = null;
         try {
             sourcePath = PROJECT_PATH+RESOURCES_PATH+"/generator/coreCode";
-            targetPath = generatePath+buildInProjectName+JAVA_PATH+NameConvertUtil.packageConvertPath(codeDefinitionDetail.getBasePackage());
+            targetPath = projectConfig.getGeneratePath()+buildInProjectName+JAVA_PATH+NameConvertUtil.packageConvertPath(codeDefinitionDetail.getBasePackage());
             FileUtils.copyDirectory(new File(sourcePath),new File(targetPath));
         } catch (IOException e) {
             throw new GlobalException(1 , LOG_PRE+"拷贝文件异常,sourcePath=["+sourcePath+"],targetPath=["+targetPath+"]",e);
@@ -70,12 +63,11 @@ public class DefaultProjectGenerator implements IProjectGenerator {
         }
 
         //4.修改pom文件追加依赖
-        String pomPath = generatePath+buildInProjectName+"/pom.xml";
-        doAppendPomDependencies(dependenciesConfig.getDependencies(),pomPath);
+        String pomPath = projectConfig.getGeneratePath()+buildInProjectName+"/pom.xml";
+        doAppendPomDependencies(projectConfig.getDependencies(),pomPath);
 
-        //5.修改application.properties
-
-        return buildInProjectName;
+        String projectPath = projectConfig.getGeneratePath()+buildInProjectName;
+        codeDefinitionDetail.setProjectPath(projectPath);
     }
 
 
@@ -111,7 +103,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
      * 追加POM元素的Dependencies
      * @param dependencies
      */
-    public void doAppendPomDependencies(List<String> dependencies,String sourcePom){
+    private void doAppendPomDependencies(List<String> dependencies,String sourcePom){
         XMLWriter writer= null;
         try {
             //1.打开文件，并构造Element树
@@ -138,12 +130,12 @@ public class DefaultProjectGenerator implements IProjectGenerator {
             writer=new XMLWriter(new FileOutputStream(sourcePom),opf);
             writer.write(doc);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new GlobalException(1,LOG_PRE+"追加POM元素节点异常",e);
         } finally {
             try {
                 writer.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(LOG_PRE+"追加POM元素关闭writer异常");
             }
         }
     }
@@ -179,7 +171,7 @@ public class DefaultProjectGenerator implements IProjectGenerator {
         String[] cmds = new String[]{shellPath,
                 codeDefinition.getGroupId(),
                 codeDefinition.getArtifactId(),
-                generatePath+buildInProjectName,
+                projectConfig.getGeneratePath()+buildInProjectName,
                 codeDefinition.getDescription(),
                 codeDefinition.getVersion(),
                 };

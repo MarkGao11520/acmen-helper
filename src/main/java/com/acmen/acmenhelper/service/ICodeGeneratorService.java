@@ -4,6 +4,7 @@ import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
 import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
+import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.DBDefinition;
 
 import java.util.List;
@@ -23,8 +24,8 @@ public interface ICodeGeneratorService {
 
     /**
      * 代码生成的核心方法
-     * @param codeDefinition
+     * @param codeDefinitionDetail
      * @return
      */
-     ServiceResult<String> genCode(CodeDefinition codeDefinition) throws GlobalException;
+     ServiceResult<String> genCode(CodeDefinitionDetail codeDefinitionDetail) throws GlobalException;
 }

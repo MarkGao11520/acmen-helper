@@ -13,6 +13,6 @@ public interface IProjectGenerator {
      * @param codeDefinition
      * @return
      */
-    String generateProjectStructure(CodeDefinitionDetail codeDefinition);
+    void generateProjectStructure(CodeDefinitionDetail codeDefinition);
 
 }

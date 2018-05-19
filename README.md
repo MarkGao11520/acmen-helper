@@ -11,9 +11,7 @@
   
   
 
-## 未来:
-扩展
-接口定义规范 --对扩展开放，对修改封闭
+## 未来
 
 纵向扩展
 -----
@@ -27,4 +25,13 @@
 --------
 1.集成登录模块（web,app端的社交登录，短信登录，验证码登录，密码登录）
 2.集成RBAC权限模块
+
+
+## 核心架构
+
+![image.png](https://upload-images.jianshu.io/upload_images/7220971-bf51c25b99c1dc7c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
   
+  
+  
+

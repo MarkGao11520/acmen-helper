@@ -5,6 +5,7 @@ import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
 import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.model.CodeDefinition;
+import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.MysqlDBDefinition;
 import com.acmen.acmenhelper.service.ICodeGeneratorService;
 import com.acmen.acmenhelper.util.JsonUtils;
@@ -46,10 +47,9 @@ public class CodeGeneratorController {
     @PostMapping("/code/mysql/generator")
     public void codeGenerator(String dataJSON,
                               HttpServletResponse response) throws GlobalException {
-        System.out.println(dataJSON);
-
         CodeDefinition codeDefinition = JsonUtils.fromJSON(dataJSON,CodeDefinition.class);
-        ServiceResult<String> res = codeGenerator.genCode(codeDefinition);
+        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition);
+        ServiceResult<String> res = codeGenerator.genCode(codeDefinitionDetail);
         if(!res.isSuccess()){
             throw new GlobalException(1 , "未知异常" , null);
         }
@@ -98,7 +98,7 @@ public class CodeGeneratorController {
     public String resolveException(HttpServletRequest request , HttpServletResponse response , Exception e) {
         GlobalException ex = (GlobalException)e;
         log.error("Exception:{}" , ex.getE());
-        ApiResponse apiResponse = new ApiResponse(ex.getCode() , ex.getMessage());
+        ApiResponse apiResponse = new ApiResponse(ex.getCode() , ex.getMsg());
         return JSON.toJSONString(apiResponse);
     }
 }

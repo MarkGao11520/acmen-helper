@@ -2,44 +2,32 @@ package com.acmen.acmenhelper.generate;
 
 import com.acmen.acmenhelper.common.RequestHolder;
 import com.acmen.acmenhelper.exception.GlobalException;
-import com.acmen.acmenhelper.model.CodeDefinition;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
 import com.acmen.acmenhelper.model.DBDefinition;
 import com.google.common.collect.Maps;
-import freemarker.template.TemplateExceptionHandler;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.internal.DefaultShellCallback;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.acmen.acmenhelper.model.CodeDefinitionDetail.*;
+import static com.acmen.acmenhelper.model.CodeDefinitionDetail.JAVA_PATH;
+import static com.acmen.acmenhelper.model.CodeDefinitionDetail.RESOURCES_PATH;
 import static com.acmen.acmenhelper.util.NameConvertUtil.*;
 
 /**
  * 默认代码生成器，SOA单体架构
  * @author gaowenfeng
  * @date 2018/5/16
- *
- * TODO 待测试
  */
-@Service("defaultCodeGenerator")
-@Scope("prototype")
 @Slf4j
-//TODO 测试用最后删掉
-@Data
 public class DefaultCodeGenerator extends AbstractCodeGenerator {
 
     private final static String LOG_PRE = "代码生成器>";
@@ -47,17 +35,10 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     @Autowired
     private freemarker.template.Configuration cfg;
 
-    private Context context;
+
 
     @Override
-    public void setCodeDefinitionDetail(CodeDefinitionDetail codeDefinitionDetail) {
-        super.setCodeDefinitionDetail(codeDefinitionDetail);
-        this.context = getContext();
-    }
-
-    @Override
-    protected void genConfigCode() {
-        CodeDefinitionDetail codeDefinitionDetail = this.codeDefinitionDetail;
+    protected void genConfigCode(CodeDefinitionDetail codeDefinitionDetail) {
         DBDefinition dbDefinition = getDbDefinitionFromSession();
         Map<String, Object> data = buildConfigDataMap(codeDefinitionDetail, dbDefinition);
 
@@ -71,16 +52,39 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         generateFtlCode(data,mybatisConfigFile,"MybatisConfigurator.ftl");
     }
 
+
     @Override
-    protected void genFtlCode(String tableName, String modelName) {
+    protected void genBaseCode(CodeDefinitionDetail codeDefinitionDetail) throws GlobalException {
+        Context context = getContext(codeDefinitionDetail);
+        for (String tableName : codeDefinitionDetail.getCodeDefinition().getTableList()) {
+            genCodeByCustomModelName(tableName, null,codeDefinitionDetail,context);
+        }
+    }
+
+    /**
+     * 通过数据表名称，和自定义的 Model 名称生成代码
+     * 如输入表名称 "t_user_detail" 和自定义的 Model 名称 "User" 将生成 User、UserMapper、UserService ...
+     * @param tableName 数据表名称
+     * @param modelName 自定义的 Model 名称
+     */
+    private void genCodeByCustomModelName(String tableName, String modelName,CodeDefinitionDetail codeDefinitionDetail,Context context){
+        genModelAndMapper(tableName, modelName,context);
+        genServiceAndController(tableName, modelName,codeDefinitionDetail);
+    }
+
+    /**
+     * 使用freemarker生成service，controller层代码
+     * @param tableName
+     * @param modelName
+     * @param codeDefinitionDetail
+     */
+    private void genServiceAndController(String tableName, String modelName,CodeDefinitionDetail codeDefinitionDetail) {
         String modelNameUpperCamel = buildModelNameUpperCamel(tableName, modelName);
 
         log.info(LOG_PRE+modelNameUpperCamel+"-controller/service/impl生成开始");
         try {
-            CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
-
             //构建占位符数据
-            Map<String,Object> data = buildCrudDataMap(modelNameUpperCamel,tableName);
+            Map<String,Object> data = buildBaseDataMap(modelNameUpperCamel,tableName,codeDefinitionDetail);
 
             //生成java类
             File controllerFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getControllerPackage() + modelNameUpperCamel + "Controller.java");
@@ -100,8 +104,13 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         }
     }
 
-    @Override
-    protected void genModelAndMapper(String tableName, String modelName) {
+    /**
+     * 使用mybatis生成工具生成dao层代码
+     * @param tableName
+     * @param modelName
+     * @param context
+     */
+    private void genModelAndMapper(String tableName, String modelName,Context context) {
         TableConfiguration tableConfiguration = new TableConfiguration(context);
         tableConfiguration.setTableName(tableName);
         if (StringUtils.isNotEmpty(modelName)){
@@ -137,6 +146,25 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         log.info(LOG_PRE+modelName + "Mapper.xml 生成成功");
     }
 
+    /**
+     * 生成代码文件
+     * @param data
+     * @param file
+     * @param ftlName
+     * @return
+     */
+    private void generateFtlCode(Map<String,Object> data,File file,String ftlName){
+        try {
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            cfg.getTemplate(ftlName).process(data,
+                    new FileWriter(file));
+        } catch (Exception e) {
+            throw new GlobalException(1 , LOG_PRE+"生成代码文件异常，请重试" , e);
+        }
+    }
+
 
     /**
      * 构建Crud模板的map
@@ -144,10 +172,10 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
      * @param modelNameUpperCamel
      * @return
      */
-    private Map<String,Object> buildCrudDataMap(String modelNameUpperCamel,String tableName){
+    private Map<String,Object> buildBaseDataMap(String modelNameUpperCamel,String tableName,CodeDefinitionDetail codeDefinitionDetail){
         Map<String, Object> data = Maps.newHashMap();
 
-        data.put("date", this.codeDefinitionDetail.getCodeDefinition().getAuthor());
+        data.put("date", codeDefinitionDetail.getCodeDefinition().getAuthor());
         data.put("author", codeDefinitionDetail.getCodeDefinition().getAuthor());
 
         data.put("baseRequestMapping", modelNameConvertMappingPath(modelNameUpperCamel));
@@ -183,9 +211,8 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
      * 获取Mybatis上下文
      * @return
      */
-    private Context getContext() {
+    private Context getContext(CodeDefinitionDetail codeDefinitionDetail) {
         DBDefinition dbDefinition = getDbDefinitionFromSession();
-        CodeDefinitionDetail codeDefinitionDetail = super.codeDefinitionDetail;
 
         Context context = new Context(ModelType.FLAT);
         context.setId("Potato");
@@ -224,25 +251,6 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     }
 
     /**
-     * 生成代码文件
-     * @param data
-     * @param file
-     * @param ftlName
-     * @return
-     */
-    private void generateFtlCode(Map<String,Object> data,File file,String ftlName){
-        try {
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-            cfg.getTemplate(ftlName).process(data,
-                    new FileWriter(file));
-        } catch (Exception e) {
-            throw new GlobalException(1 , LOG_PRE+"生成代码文件异常，请重试" , e);
-        }
-    }
-
-    /**
      * 创建model名称
      * @param tableName
      * @param modelName
@@ -264,34 +272,6 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
             throw new GlobalException(1 , LOG_PRE+"从session中获取DBDefinition失败",e);
         }
         return dbDefinition;
-    }
-
-
-    /**
-     * 测试
-     * @param args
-     * @throws IOException
-     */
-    public static void main(String[] args) throws IOException, GlobalException {
-        DefaultCodeGenerator defaultCodeGenerator = new DefaultCodeGenerator();
-        CodeDefinition codeDefinition = new CodeDefinition();
-        codeDefinition.setArtifactId("demo");
-        codeDefinition.setGroupId("com.example");
-
-        codeDefinition.setProjectName("test-demo");
-        codeDefinition.setDescription("测试");
-        codeDefinition.setVersion("vt2.1");
-        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition,"/Users/gaowenfeng/project/data/test-demo");
-
-        defaultCodeGenerator.setCodeDefinitionDetail(codeDefinitionDetail);
-
-        freemarker.template.Configuration cfg = new freemarker.template.Configuration(freemarker.template.Configuration.VERSION_2_3_23);
-        cfg.setDirectoryForTemplateLoading(new File(PROJECT_PATH+TEMPLATE_FILE_PATH));
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
-
-        defaultCodeGenerator.setCfg(cfg);
-        defaultCodeGenerator.genCodeByCustomModelName("blog",null);
     }
 
 }

@@ -2,6 +2,7 @@ package com.acmen.acmenhelper.service;
 
 import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
+import com.acmen.acmenhelper.config.ProjectConfig;
 import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.generate.AbstractCodeGenerator;
 import com.acmen.acmenhelper.generate.IProjectGenerator;
@@ -37,23 +38,22 @@ import java.util.List;
 @Slf4j
 public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
 
-    @Value("${acmen.project.code_generator}")
-    private String codeGeneratorName;
-
-    @Value("${acmen.project.project_generator}")
-    private String projectGeneratorName = "defaultProjectGenerator";
-
-    @Value("${acmen.project.generate_path}")
-    private String generatePath;
-
-    private IProjectGenerator projectGenerator = ApplicationContextHolder.getBean(projectGeneratorName);
+    @Autowired
+    private ProjectConfig projectConfig;
 
     @Autowired
     private HttpSession session;
 
+    @Autowired
+    private IProjectGenerator projectGenerator;
+
+    @Autowired
+    private AbstractCodeGenerator codeGenerator;
+
+
 
     @Override
-    public ServiceMultiResult<String> getTableList(DBDefinition dbDefinition) throws GlobalException {
+    public ServiceMultiResult<String> getTableList(DBDefinition dbDefinition){
         List<String> tables = new ArrayList<>();
 
         //创建驱动器
@@ -76,30 +76,22 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
     }
 
     @Override
-    public ServiceResult<String> genCode(CodeDefinition codeDefinition) throws GlobalException {
-        //1.生成项目骨架：
-        CodeDefinitionDetail codeDefinitionDetail = new CodeDefinitionDetail(codeDefinition);
-
-        String projectName = projectGenerator.generateProjectStructure(codeDefinitionDetail);
-        String projectPath = generatePath+projectName;
-        codeDefinitionDetail.setProjectPath(projectPath);
-
+    public ServiceResult<String> genCode(CodeDefinitionDetail codeDefinitionDetail){
         String dist;
         try {
-            //2.使用mybatis的自动生成工具生成dao,mapper,pojo
-            //3.使用freemarker模板引擎生成service，controller层代码
-            AbstractCodeGenerator defaultCodeGenerator = ApplicationContextHolder.getBean(codeGeneratorName);
-            defaultCodeGenerator.setCodeDefinitionDetail(codeDefinitionDetail);
-            defaultCodeGenerator.genCode();
+            //1.生成项目骨架：
+            projectGenerator.generateProjectStructure(codeDefinitionDetail);
 
-            //4.打包项目，使用response输出
-            dist = generatePath+codeDefinition.getProjectName()+".zip";
-            CompressUtil.doZipCompress(projectPath,dist);
+            //2.生成项目基本代码
+            codeGenerator.genCode(codeDefinitionDetail);
+
+            //3.打包项目，使用response输出
+            dist = projectConfig.getGeneratePath()+codeDefinitionDetail.getCodeDefinition().getProjectName()+".zip";
+            CompressUtil.doZipCompress(codeDefinitionDetail.getProjectPath(),dist);
         } finally {
-            //5.删除项目
-            destoryProject(projectPath);
+            //4.删除项目
+            destoryProject(codeDefinitionDetail.getProjectPath());
         }
-
         return ServiceResult.of(dist);
     }
 

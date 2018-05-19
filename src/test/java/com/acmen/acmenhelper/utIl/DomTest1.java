@@ -1,10 +1,7 @@
 package com.acmen.acmenhelper.utIl;
 
 import com.acmen.acmenhelper.AcmenHelperApplicationTests;
-import com.acmen.acmenhelper.config.DependenciesConfig;
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.acmen.acmenhelper.config.ProjectConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -13,13 +10,11 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author gaowenfeng
@@ -28,11 +23,11 @@ import java.util.Map;
 public class DomTest1 extends AcmenHelperApplicationTests {
 
     @Autowired
-    private DependenciesConfig dependenciesConfig;
+    private ProjectConfig projectConfig;
 
     @Test
     public void test(){
-        appendPomDependencies(dependenciesConfig.getDependencies());
+        appendPomDependencies(projectConfig.getDependencies());
     }
 
     public void appendPomDependencies(List<String> dependencies){

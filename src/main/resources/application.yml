@@ -1,8 +1,7 @@
 acmen:
-  project:
-    generate_path : /Users/gaowenfeng/project/data/
-    code_generator : defaultCodeGenerator
-    project_generator : defaultProjectGenerator
+  generatePath : /Users/gaowenfeng/project/data/
+  codeGeneratorClass : com.acmen.acmenhelper.generate.DefaultCodeGenerator
+  projectGeneratorClass : com.acmen.acmenhelper.generate.DefaultProjectGenerator
   dependencies:
     - tk.mybatis,mapper-spring-boot-starter,1.1.1
     - com.github.pagehelper,pagehelper,4.2.1

@@ -150,6 +150,11 @@
 							password:$('#pwd').val()
 						},
 						success:function (result) {
+						    if(result.code!=200){
+						        alert(JSON.parse(result).message);
+						        return;
+							}
+
                             var temp = document.getElementById("checkboxes");
                             var tpl = '';
                             for (var i = 0; i < result.data.length; i++) {

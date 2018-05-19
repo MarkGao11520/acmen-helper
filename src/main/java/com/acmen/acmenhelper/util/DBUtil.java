@@ -21,7 +21,7 @@ public class DBUtil {
             Class.forName(dbDefinition.getDriverClass());
             con = DriverManager.getConnection(dbDefinition.getUrl(), dbDefinition.getUsername(), dbDefinition.getPassword());
         } catch (Exception e) {
-            throw new GlobalException(0 , "获取数据库连接异常" , e);
+            throw new GlobalException(1 , "获取数据库连接异常" , e);
         }
         return con;
     }
