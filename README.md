@@ -1,7 +1,7 @@
 # acmen-helper
 ### 还在为繁琐的配置工作和重复的基础Coding而烦恼吗？Acmen-helper一键搞定 。Easy Coding，Enjoy life!
 
-# 最新跟新
+# 最新更新
 ------
 支持生成一个多模块的项目，为生成微服务项目做准备
 - xxx-dao 为数据库持久层
