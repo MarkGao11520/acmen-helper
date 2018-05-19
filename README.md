@@ -1,6 +1,14 @@
 # acmen-helper
 ### 还在为繁琐的配置工作和重复的基础Coding而烦恼吗？Acmen-helper一键搞定 。Easy Coding，Enjoy life!
 
+# 最新跟新
+------
+支持生成一个多模块的项目，为生成微服务项目做准备
+- xxx-dao 为数据库持久层
+- xxx-service为业务逻辑层
+- xxx-web为mvc层
+- xxx-core为核心依赖及配置（其他模块都要依赖这一个模块）
+
 ![image.png](https://upload-images.jianshu.io/upload_images/7220971-71402650b5c418c8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ##  背景：

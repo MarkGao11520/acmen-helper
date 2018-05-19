@@ -1,7 +1,8 @@
 acmen:
   generatePath : /Users/gaowenfeng/project/data/
+  isSpiltModule : true
   codeGeneratorClass : com.acmen.acmenhelper.generate.defaults.DefaultCodeGenerator
-  projectGeneratorClass : com.acmen.acmenhelper.generate.defaults.DefaultProjectGenerator
+  projectGeneratorClass : com.acmen.acmenhelper.generate.spiltmodule.SpiltModuleProjectGenerator
   dependencies:
     - tk.mybatis,mapper-spring-boot-starter,1.1.1
     - com.github.pagehelper,pagehelper,4.2.1

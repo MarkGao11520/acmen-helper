@@ -24,5 +24,7 @@ public class ProjectConfig {
 
     private String projectGeneratorClass;
 
+    private String isSpiltModule;
+
     private List<String> dependencies = Lists.newArrayList();
 }

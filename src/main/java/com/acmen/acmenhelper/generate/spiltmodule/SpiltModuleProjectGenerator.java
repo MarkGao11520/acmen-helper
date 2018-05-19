@@ -29,7 +29,6 @@ import static com.acmen.acmenhelper.util.ExecCommandUtil.*;
  */
 @Slf4j
 @Data
-@Service
 public class SpiltModuleProjectGenerator implements IProjectGenerator {
     private final static String LOG_PRE = "分模块生成项目基本骨架>";
 

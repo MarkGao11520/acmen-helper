@@ -1,6 +1,7 @@
 package com.acmen.acmenhelper.generate.defaults;
 
 import com.acmen.acmenhelper.common.RequestHolder;
+import com.acmen.acmenhelper.config.ProjectConfig;
 import com.acmen.acmenhelper.exception.GlobalException;
 import com.acmen.acmenhelper.generate.AbstractCodeGenerator;
 import com.acmen.acmenhelper.model.CodeDefinitionDetail;
@@ -36,20 +37,25 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
     @Autowired
     private freemarker.template.Configuration cfg;
 
+    @Autowired
+    private ProjectConfig projectConfig;
+
 
 
     @Override
     protected void genConfigCode(CodeDefinitionDetail codeDefinitionDetail) {
         DBDefinition dbDefinition = getDbDefinitionFromSession();
+        String projectPath = getProjectPath(codeDefinitionDetail,"web");
         Map<String, Object> data = buildConfigDataMap(codeDefinitionDetail, dbDefinition);
 
-        File ymlDevFile = new File(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH + "/application-dev.yml");
+        File ymlDevFile = new File(projectPath + RESOURCES_PATH + "/application-dev.yml");
         generateFtlCode(data,ymlDevFile,"application-dev.ftl");
 
-        File ymlFile = new File(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH + "/application.yml");
+        File ymlFile = new File(projectPath + RESOURCES_PATH + "/application.yml");
         generateFtlCode(data,ymlFile,"application.ftl");
 
-        File mybatisConfigFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getCorePackage() + "/MybatisConfigurator.java");
+        projectPath = getProjectPath(codeDefinitionDetail,"core");
+        File mybatisConfigFile = new File(projectPath + JAVA_PATH + codeDefinitionDetail.getCorePackage() + "/MybatisConfigurator.java");
         generateFtlCode(data,mybatisConfigFile,"MybatisConfigurator.ftl");
     }
 
@@ -88,15 +94,17 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
             Map<String,Object> data = buildBaseDataMap(modelNameUpperCamel,tableName,codeDefinitionDetail);
 
             //生成java类
-            File controllerFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getControllerPackage() + modelNameUpperCamel + "Controller.java");
+            String projectWebPath = getProjectPath(codeDefinitionDetail,"web");
+            File controllerFile = new File(projectWebPath + JAVA_PATH + codeDefinitionDetail.getControllerPackage() + modelNameUpperCamel + "Controller.java");
             generateFtlCode(data,controllerFile,"controller.ftl");
 
             //生成server类
-            File serviceFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getServicePackage() + modelNameUpperCamel + "Service.java");
+            String projectServicePath = getProjectPath(codeDefinitionDetail,"service");
+            File serviceFile = new File(projectServicePath+ JAVA_PATH + codeDefinitionDetail.getServicePackage() + modelNameUpperCamel + "Service.java");
             generateFtlCode(data,serviceFile,"service.ftl");
 
             //生成server.impl类
-            File serviceImplFile = new File(codeDefinitionDetail.getProjectPath() + JAVA_PATH + codeDefinitionDetail.getServiceImplPackage() + modelNameUpperCamel + "ServiceImpl.java");
+            File serviceImplFile = new File(projectServicePath+ JAVA_PATH + codeDefinitionDetail.getServiceImplPackage() + modelNameUpperCamel + "ServiceImpl.java");
             generateFtlCode(data,serviceImplFile,"service-impl.ftl");
 
             log.info(LOG_PRE+modelNameUpperCamel+"-controller/service/impl生成成功");
@@ -214,7 +222,7 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
      */
     private Context getContext(CodeDefinitionDetail codeDefinitionDetail) {
         DBDefinition dbDefinition = getDbDefinitionFromSession();
-
+        String projectPath = getProjectPath(codeDefinitionDetail,"dao");
         Context context = new Context(ModelType.FLAT);
         context.setId("Potato");
         context.setTargetRuntime("MyBatis3Simple");
@@ -234,21 +242,31 @@ public class DefaultCodeGenerator extends AbstractCodeGenerator {
         context.addPluginConfiguration(pluginConfiguration);
 
         JavaModelGeneratorConfiguration javaModelGeneratorConfiguration = new JavaModelGeneratorConfiguration();
-        javaModelGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + JAVA_PATH);
+        javaModelGeneratorConfiguration.setTargetProject(projectPath + JAVA_PATH);
         javaModelGeneratorConfiguration.setTargetPackage(codeDefinitionDetail.getModulePackage());
         context.setJavaModelGeneratorConfiguration(javaModelGeneratorConfiguration);
 
         SqlMapGeneratorConfiguration sqlMapGeneratorConfiguration = new SqlMapGeneratorConfiguration();
-        sqlMapGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + RESOURCES_PATH);
+        sqlMapGeneratorConfiguration.setTargetProject(projectPath + RESOURCES_PATH);
         sqlMapGeneratorConfiguration.setTargetPackage("mapper");
         context.setSqlMapGeneratorConfiguration(sqlMapGeneratorConfiguration);
 
         JavaClientGeneratorConfiguration javaClientGeneratorConfiguration = new JavaClientGeneratorConfiguration();
-        javaClientGeneratorConfiguration.setTargetProject(codeDefinitionDetail.getProjectPath() + JAVA_PATH);
+        javaClientGeneratorConfiguration.setTargetProject(projectPath + JAVA_PATH);
         javaClientGeneratorConfiguration.setTargetPackage(codeDefinitionDetail.getMapperPackage());
         javaClientGeneratorConfiguration.setConfigurationType("XMLMAPPER");
         context.setJavaClientGeneratorConfiguration(javaClientGeneratorConfiguration);
         return context;
+    }
+
+    private String getProjectPath(CodeDefinitionDetail codeDefinitionDetail,String module) {
+        String projectPath = null;
+        if("true".equals(projectConfig.getIsSpiltModule())){
+            projectPath = codeDefinitionDetail.getProjectPath()+"/"+codeDefinitionDetail.getCodeDefinition().getArtifactId()+"-"+module;
+        }else {
+            projectPath = codeDefinitionDetail.getProjectPath();
+        }
+        return projectPath;
     }
 
     /**
