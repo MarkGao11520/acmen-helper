@@ -1,5 +1,5 @@
 # acmen-helper
-可能是最棒的代码自动生成工具
+### 还在为繁琐的配置工作和重复的基础Coding而烦恼吗？Acmen-helper一键搞定 。Easy Coding，Enjoy life!
 
 ![image.png](https://upload-images.jianshu.io/upload_images/7220971-71402650b5c418c8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
