@@ -38,6 +38,9 @@ import java.util.List;
 @Slf4j
 public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
 
+    private final static String LOG_PRE = "生成项目基本骨架>";
+
+
     @Autowired
     private ProjectConfig projectConfig;
 
