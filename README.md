@@ -13,13 +13,15 @@
 
 # 快速开始
 ```
+# 这个项目需要安装springboot-cli才可以使用
 # 本项目是一个springboot项目，启动需要先进入项目目录
 git clone https://github.com/MarkGao11520/acmen-helper.git
 cd acmen-helper
 # 然后打包项目
 mvn clean package
 # 运行
-java -jar acmen-helper.jar -acmen.generatePath="需要指定一个项目生成的临时目录"
+java -jar target/#{包名}.jar -acmen.generatePath="需要指定一个项目生成的临时目录"
+# 然后登陆浏览器输入数据库信息点击查询->选择数据库表->填写项目基本信息->点击下载->稍等几秒即可获得一个springboot项目，导入IDEA可以直接运行，然后在这方面开发即可
 ```
 
 ##  背景：
