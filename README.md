@@ -21,7 +21,8 @@ cd acmen-helper
 mvn clean package
 # 运行
 java -jar target/#{包名}.jar -acmen.generatePath="需要指定一个项目生成的临时目录"
-# 然后登陆浏览器输入数据库信息点击查询->选择数据库表->填写项目基本信息->点击下载->稍等几秒即可获得一个springboot项目，导入IDEA可以直接运行，然后在这方面开发即可
+# 然后登陆浏览器http://localhost:9090输入数据库信息点击查询->选择数据库表->填写项目基本信息->点击下载->稍等几秒即可获得一个springboot项目，
+导入IDEA可以直接运行，然后在这基础上开发即可
 ```
 
 ##  背景：
