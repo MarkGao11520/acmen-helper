@@ -11,6 +11,17 @@
 
 ![image.png](https://upload-images.jianshu.io/upload_images/7220971-71402650b5c418c8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+# 快速开始
+```
+# 本项目是一个springboot项目，启动需要先进入项目目录
+git clone https://github.com/MarkGao11520/acmen-helper.git
+cd acmen-helper
+# 然后打包项目
+mvn clean package
+# 运行
+java -jar acmen-helper.jar -acmen.generatePath="需要指定一个项目生成的临时目录"
+```
+
 ##  背景：
 当前每次启动一个新的项目工程，都需要进行复杂而又繁琐的配置工作已经重复的基本代码coding，效率低下。
 ## 目标：
