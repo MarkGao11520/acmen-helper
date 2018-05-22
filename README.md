@@ -9,7 +9,11 @@
 - xxx-web为mvc层
 - xxx-core为核心依赖及配置（其他模块都要依赖这一个模块）
 
-![image.png](https://upload-images.jianshu.io/upload_images/7220971-71402650b5c418c8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![项目演示](https://upload-images.jianshu.io/upload_images/7220971-36b90f9a50422884.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+- ### 生成的项目结构
+![生成的项目结构](https://upload-images.jianshu.io/upload_images/7220971-422612fd6b139bc9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![生成的项目结构-多模块](https://upload-images.jianshu.io/upload_images/7220971-bcae0075b8619fa9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 
 # 快速开始
 ```
