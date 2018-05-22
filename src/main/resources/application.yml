@@ -1,6 +1,6 @@
 acmen:
   generatePath : /Users/gaowenfeng/project/data/
-  isSpiltModule : true
+  isSpiltModule : false
   codeGeneratorClass : com.acmen.acmenhelper.generate.defaults.DefaultCodeGenerator
   projectGeneratorClass : com.acmen.acmenhelper.generate.defaults.DefaultProjectGenerator
   # com.acmen.acmenhelper.generate.spiltmodule.SpiltModuleProjectGenerator
