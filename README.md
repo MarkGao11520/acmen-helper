@@ -17,6 +17,7 @@
 
 # 快速开始
 ```
+# 暂时只支持linux和mac系统，不支持Windows系统
 # 这个项目需要安装springboot-cli才可以使用
 # 本项目是一个springboot项目，启动需要先进入项目目录
 git clone https://github.com/MarkGao11520/acmen-helper.git
