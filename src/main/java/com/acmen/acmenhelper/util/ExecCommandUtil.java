@@ -24,6 +24,7 @@ public class ExecCommandUtil {
         Process pro = null;
         try{
             //1.2执行命令并阻塞至执行完成
+            Runtime.getRuntime().exec("chmod +x"+cmds[0]);
             pro = Runtime.getRuntime().exec(cmds);
             pro.waitFor();
 
