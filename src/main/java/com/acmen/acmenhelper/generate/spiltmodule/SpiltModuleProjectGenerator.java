@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.acmen.acmenhelper.model.CodeDefinitionDetail.*;
 import static com.acmen.acmenhelper.util.ExecCommandUtil.*;
@@ -85,11 +86,10 @@ public class SpiltModuleProjectGenerator implements IProjectGenerator {
         String pomPath = projectConfig.getGeneratePath()+buildInProjectName+"/pom.xml";
         try {
             PomUtil.handlePom(root -> {
-                root.element("packaging").setText("pom");
-                root.remove(root.element("dependencies"));
-
-                Element properties = root.element("properties");
-                properties.addElement("project.version").setText(codeDefinition.getVersion());
+                Element packaging = Optional.ofNullable(root.element("packaging")).orElse(root.addElement("packaging"));
+                packaging.setText("pom");
+                Optional.ofNullable(root.element("dependencies")).ifPresent(root::remove);
+                Optional.ofNullable(root.element("properties")).ifPresent(properties->properties.addElement("project.version").setText(codeDefinition.getVersion()));
             },pomPath);
         } catch (Exception e) {
             throw new GlobalException(ApiResponse.Status.INTERNAL_SERVER_ERROR.getCode(),"修改POM文件异常",e);

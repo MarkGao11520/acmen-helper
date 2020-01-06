@@ -1,5 +1,6 @@
 package com.acmen.acmenhelper.service;
 
+import com.acmen.acmenhelper.common.ApiResponse;
 import com.acmen.acmenhelper.common.ServiceMultiResult;
 import com.acmen.acmenhelper.common.ServiceResult;
 import com.acmen.acmenhelper.config.ProjectConfig;
@@ -91,7 +92,10 @@ public class CodeGeneratorServiceImpl implements ICodeGeneratorService{
             //3.打包项目，使用response输出
             dist = projectConfig.getGeneratePath()+codeDefinitionDetail.getCodeDefinition().getProjectName()+".zip";
             CompressUtil.doZipCompress(codeDefinitionDetail.getProjectPath(),dist);
-        } finally {
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new GlobalException(ApiResponse.Status.INTERNAL_SERVER_ERROR.getCode(),e.getMessage(),e);
+        }finally {
             //4.删除项目
             destoryProject(codeDefinitionDetail.getProjectPath());
         }

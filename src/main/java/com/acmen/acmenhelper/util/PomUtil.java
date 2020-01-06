@@ -11,6 +11,7 @@ import org.dom4j.io.XMLWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author gaowenfeng
@@ -66,7 +67,7 @@ public class PomUtil {
     }
 
 
-    public static void handlePom(Option option,String pomSrc) throws Exception{
+    public static void handlePom(Consumer<Element> consumer, String pomSrc) throws Exception{
 
         XMLWriter writer = null;
 
@@ -75,7 +76,7 @@ public class PomUtil {
             Document doc = new SAXReader().read(pomFile);
             Element root = doc.getRootElement();
 
-            option.option(root);
+            consumer.accept(root);
             OutputFormat opf=new OutputFormat("\t",true,"UTF-8");
             opf.setTrimText(true);
             writer=new XMLWriter(new FileOutputStream(pomSrc),opf);
@@ -83,9 +84,5 @@ public class PomUtil {
         } finally {
             writer.close();
         }
-    }
-
-    public interface Option{
-        void option(Element root);
     }
 }
